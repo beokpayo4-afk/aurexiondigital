@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import select
 
 from app.core.database import SessionLocal
 from app.models.enums import BillingPeriod, BusinessArea, ListingChannel, ProductType
-from app.models.products import Product, ProductCategory, ProductImage, ProductPrice
+from app.models.products import Product, ProductCategory, ProductFeature, ProductImage, ProductPrice
 from app.models.services import Service, ServicePackage
 
 PACKAGE_PRICES = {
@@ -25,8 +26,17 @@ PRODUCTS = [
         "slug": "social-media-content-kit",
         "name": "Social Media Content Kit",
         "category": "marketing-resources",
-        "summary": "Thirty ready-to-edit posts, captions, and story frames for a month of social media.",
-        "description": "A downloadable kit for businesses that need a consistent feed without starting from a blank page. It includes post layouts, caption starters, and a simple monthly calendar.",
+        "summary": "Create Better Social Content in Less Time",
+        "description": "A complete social media content kit designed to help businesses, creators, and marketers plan, create, and publish professional content consistently.",
+        "included": [
+            "Social media post templates",
+            "Content planning templates",
+            "Caption ideas",
+            "Content calendar",
+            "Engagement post ideas",
+            "Call-to-action ideas",
+        ],
+        "audience": "Small businesses, startups, creators, agencies & freelancers.",
         "amount": "2499.00",
         "sku": "AX-SOC-001",
         "image": "/products/social-media-content-kit.webp",
@@ -35,8 +45,18 @@ PRODUCTS = [
         "slug": "meta-ads-campaign-pack",
         "name": "Meta Ads Campaign Pack",
         "category": "marketing-resources",
-        "summary": "Campaign structure, audience notes, and ad copy templates for Facebook and Instagram.",
-        "description": "Use this pack to brief a first paid social campaign. It covers campaign objectives, audience worksheets, and short ad variations you can adapt.",
+        "summary": "Launch Smarter Meta Ads Campaigns",
+        "description": "A ready-to-use campaign pack to help you plan and structure effective Facebook and Instagram advertising campaigns without starting from scratch.",
+        "included": [
+            "Campaign planning templates",
+            "Ad copy templates",
+            "Audience research framework",
+            "Creative ideas",
+            "Campaign structure",
+            "Testing checklist",
+            "Optimization checklist",
+        ],
+        "audience": "Business owners, marketers, agencies & freelancers.",
         "amount": "3499.00",
         "sku": "AX-ADS-002",
         "image": "/products/meta-ads-campaign-pack.png",
@@ -45,8 +65,17 @@ PRODUCTS = [
         "slug": "brand-identity-starter",
         "name": "Brand Identity Starter",
         "category": "digital-products",
-        "summary": "A compact brand worksheet covering name, colours, type, and a one-page style guide.",
-        "description": "For a new business that needs a clear look before a website or campaign. The starter records your colours, type choices, and how the name should appear.",
+        "summary": "Build a Professional Brand From Day One",
+        "description": "Everything you need to establish a consistent and professional visual identity for your business.",
+        "included": [
+            "Brand identity guidelines",
+            "Color palette framework",
+            "Typography guide",
+            "Logo usage guidelines",
+            "Brand voice guidance",
+            "Visual consistency checklist",
+        ],
+        "audience": "Startups, entrepreneurs, small businesses & new brands.",
         "amount": "4999.00",
         "sku": "AX-BRD-003",
         "image": "/products/brand-identity-starter.jpg",
@@ -55,8 +84,18 @@ PRODUCTS = [
         "slug": "website-launch-checklist",
         "name": "Website Launch Checklist",
         "category": "technology-products",
-        "summary": "A practical checklist for pages, forms, speed, and the details to confirm before launch.",
-        "description": "Walk through content, contact forms, mobile layout, and basic search setup before a site goes live. Written for owners, not only developers.",
+        "summary": "Launch Your Website With Confidence",
+        "description": "A practical website launch checklist that helps you make sure your website is ready, professional, optimized, and prepared for visitors before going live.",
+        "included": [
+            "Design checklist",
+            "Mobile responsiveness checklist",
+            "SEO checklist",
+            "Performance checklist",
+            "Security checklist",
+            "Analytics setup checklist",
+            "Final pre-launch checklist",
+        ],
+        "audience": "Website owners, startups, developers, freelancers & agencies.",
         "amount": "1499.00",
         "sku": "AX-WEB-004",
         "image": "/products/website-launch-checklist.jpg",
@@ -65,8 +104,18 @@ PRODUCTS = [
         "slug": "lead-magnet-templates",
         "name": "Lead Magnet Templates",
         "category": "marketing-resources",
-        "summary": "Five lead-magnet outlines with landing-page copy you can fill in for your offer.",
-        "description": "Templates for a checklist, a short guide, a worksheet, a webinar invite, and a consultation offer. Each one includes a headline and a call to action.",
+        "summary": "Turn Your Expertise Into Leads",
+        "description": "Ready-to-use lead magnet templates designed to help you attract potential customers and grow your email or customer database.",
+        "included": [
+            "Lead magnet templates",
+            "Checklist templates",
+            "Guide templates",
+            "Workbook templates",
+            "PDF resource layouts",
+            "Lead capture ideas",
+            "CTA templates",
+        ],
+        "audience": "Coaches, consultants, agencies, creators & online businesses.",
         "amount": "1999.00",
         "sku": "AX-LED-005",
         "image": "/products/lead-magnet-templates.jpg",
@@ -75,8 +124,18 @@ PRODUCTS = [
         "slug": "business-proposal-kit",
         "name": "Business Proposal Kit",
         "category": "business-resources",
-        "summary": "A proposal outline, pricing table, and follow-up email for client work.",
-        "description": "Send a clear proposal instead of a long chat thread. The kit covers the problem, the work, the fee, and the next step.",
+        "summary": "Send Proposals That Win More Business",
+        "description": "A professional proposal kit designed to help you present your services, pricing, process, and value clearly to potential clients.",
+        "included": [
+            "Business proposal templates",
+            "Service proposal structure",
+            "Pricing section",
+            "Project scope template",
+            "Timeline section",
+            "Terms & conditions section",
+            "Client-ready presentation structure",
+        ],
+        "audience": "Freelancers, agencies, consultants, service businesses & startups.",
         "amount": "2999.00",
         "sku": "AX-PRP-006",
         "image": "/products/business-proposal-kit.jpg",
@@ -85,8 +144,18 @@ PRODUCTS = [
         "slug": "seo-starter-toolkit",
         "name": "SEO Starter Toolkit",
         "category": "marketing-resources",
-        "summary": "Page-title formulas, a keyword sheet, and an on-page review list for a small site.",
-        "description": "A first pass at search visibility for a local or small business site. It does not replace an ongoing campaign. It gives you the pages and titles to fix first.",
+        "summary": "Start Optimizing Your Website for Search",
+        "description": "A beginner-friendly SEO toolkit that helps businesses understand and organize the essential steps required to improve their website's search visibility.",
+        "included": [
+            "Keyword research framework",
+            "On-page SEO checklist",
+            "Technical SEO checklist",
+            "Content optimization guide",
+            "SEO audit checklist",
+            "Meta title & description templates",
+            "SEO planning worksheet",
+        ],
+        "audience": "Website owners, bloggers, startups, marketers & small businesses.",
         "amount": "2499.00",
         "sku": "AX-SEO-007",
         "image": "/products/seo-starter-toolkit.jpg",
@@ -95,13 +164,37 @@ PRODUCTS = [
         "slug": "email-sequence-pack",
         "name": "Email Sequence Pack",
         "category": "educational-products",
-        "summary": "Welcome, nurture, and follow-up emails for a new enquiry or a new customer.",
-        "description": "Six emails you can adapt: a welcome, two useful notes, an offer, a reminder, and a last follow-up. Written in plain language for service businesses.",
+        "summary": "Write Emails That Move Customers Forward",
+        "description": "A ready-to-use email sequence pack that helps businesses communicate with leads and customers through structured, professional email campaigns.",
+        "included": [
+            "Welcome email sequence",
+            "Lead nurturing emails",
+            "Promotional emails",
+            "Follow-up emails",
+            "Customer engagement emails",
+            "CTA ideas",
+            "Email sequence planning framework",
+        ],
+        "audience": "Online businesses, creators, agencies, coaches & marketers.",
         "amount": "1799.00",
         "sku": "AX-EML-008",
         "image": "/products/email-sequence-pack.png",
     },
 ]
+
+
+def _sync_copy(session, product: Product, item: dict) -> None:
+    product.summary = item["summary"]
+    product.description = item["description"]
+    current = session.scalars(
+        select(ProductFeature).where(ProductFeature.product_id == product.id, ProductFeature.deleted_at.is_(None))
+    ).all()
+    now = datetime.now(timezone.utc)
+    for feature in current:
+        feature.deleted_at = now
+    for order, label in enumerate(item["included"]):
+        session.add(ProductFeature(product_id=product.id, label=label, sort_order=order))
+    session.add(ProductFeature(product_id=product.id, label="Perfect for", value=item["audience"], sort_order=100))
 
 
 def main() -> None:
@@ -115,6 +208,7 @@ def main() -> None:
                 select(Product).where(Product.slug == item["slug"], Product.deleted_at.is_(None))
             ).first()
             if existing is not None:
+                _sync_copy(session, existing, item)
                 image = session.scalars(
                     select(ProductImage).where(
                         ProductImage.product_id == existing.id,
@@ -171,6 +265,7 @@ def main() -> None:
                     is_primary=True,
                 )
             )
+            _sync_copy(session, product, item)
         services = session.scalars(select(Service).where(Service.deleted_at.is_(None), Service.is_published.is_(True))).all()
         for service in services:
             packages = session.scalars(

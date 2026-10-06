@@ -258,10 +258,14 @@ export function HomePage() {
                   key={product.id}
                   name={product.name}
                   summary={product.summary}
+                  description={product.description}
+                  features={product.features}
                   productType={product.product_type}
                   amount={price?.amount}
                   currency={price?.currency}
                   billingPeriod={price?.billing_period}
+                  imageUrl={product.images?.[0]?.file_url}
+                  imageAlt={product.images?.[0]?.alt_text ?? product.name}
                   href={`/technology/products/${product.slug}`}
                 />
               );
@@ -312,16 +316,20 @@ export function HomePage() {
               : shopItems.map((product) => {
                   const price = productPrice(product);
                   return (
-                    <ProductCard
-                      key={product.id}
-                      name={product.name}
-                      summary={product.summary}
-                      productType={product.product_type}
-                      amount={price?.amount}
-                      currency={price?.currency}
-                      billingPeriod={price?.billing_period}
-                      href={`/shop/product/${product.slug}`}
-                    />
+                  <ProductCard
+                    key={product.id}
+                    name={product.name}
+                    summary={product.summary}
+                    description={product.description}
+                    features={product.features}
+                    productType={product.product_type}
+                    amount={price?.amount}
+                    currency={price?.currency}
+                    billingPeriod={price?.billing_period}
+                    imageUrl={product.images?.[0]?.file_url}
+                    imageAlt={product.images?.[0]?.alt_text ?? product.name}
+                    href={`/shop/product/${product.slug}`}
+                  />
                   );
                 })}
           </div>

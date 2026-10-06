@@ -28,7 +28,7 @@ describe("product listing", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Starter kit" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "View product" })).toHaveAttribute("href", "/shop/product/starter-kit");
+    expect(screen.getByRole("link", { name: "Get Starter kit" })).toHaveAttribute("href", "/shop/product/starter-kit");
     await user.click(screen.getByRole("button", { name: "Add to cart" }));
     expect(onAdd).toHaveBeenCalledWith(product);
   });

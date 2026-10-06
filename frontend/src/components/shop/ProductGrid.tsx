@@ -21,6 +21,8 @@ export function ProductGrid({ products, onAdd, onBuy }: ProductGridProps) {
             key={product.id}
             name={product.name}
             summary={product.summary}
+            description={product.description}
+            features={product.features}
             productType={product.product_type}
             amount={price?.amount}
             currency={price?.currency}

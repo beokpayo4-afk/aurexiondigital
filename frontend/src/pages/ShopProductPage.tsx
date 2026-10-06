@@ -89,15 +89,22 @@ export function ShopProductPage() {
               />
             ) : null}
             <p className="mt-6 text-base leading-7 text-ink/80">{record.description ?? record.summary}</p>
-            {record.features && record.features.length > 0 ? (
-              <ul className="mt-6 space-y-2 text-sm text-ink/80">
-                {record.features.map((feature) => (
-                  <li key={feature.id}>
-                    {feature.label}
-                    {feature.value ? ` — ${feature.value}` : ""}
-                  </li>
-                ))}
-              </ul>
+            {(record.features ?? []).some((feature) => feature.label !== "Perfect for") ? (
+              <>
+                <h2 className="mt-8 text-xl font-semibold">What’s included</h2>
+                <ul className="mt-4 space-y-2 text-sm leading-6 text-ink/80">
+                  {(record.features ?? [])
+                    .filter((feature) => feature.label !== "Perfect for")
+                    .map((feature) => (
+                      <li key={feature.id}>{feature.label}</li>
+                    ))}
+                </ul>
+              </>
+            ) : null}
+            {(record.features ?? []).find((feature) => feature.label === "Perfect for")?.value ? (
+              <p className="mt-6 text-sm leading-6 text-ink/75">
+                Perfect for: {(record.features ?? []).find((feature) => feature.label === "Perfect for")?.value}
+              </p>
             ) : null}
           </div>
           <div className="rounded-xl border border-line bg-white p-6 shadow-card">
@@ -115,7 +122,7 @@ export function ShopProductPage() {
                     void add(record.id, { open: false }).then(() => navigate("/checkout"));
                   }}
                 >
-                  Buy now
+                  Get {record.name}
                 </button>
               </div>
             ) : (

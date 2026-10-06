@@ -129,10 +129,14 @@ function TrackProduct({ product }: { product: Product }) {
     <ProductCard
       name={product.name}
       summary={product.summary}
+      description={product.description}
+      features={product.features}
       productType={product.product_type}
       amount={price?.amount}
       currency={price?.currency}
       billingPeriod={price?.billing_period}
+      imageUrl={product.images?.[0]?.file_url}
+      imageAlt={product.images?.[0]?.alt_text ?? product.name}
       href={`/technology/products/${product.slug}`}
     />
   );
