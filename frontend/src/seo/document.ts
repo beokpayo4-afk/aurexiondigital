@@ -22,6 +22,9 @@ function upsertMeta(attribute: "name" | "property", key: string, content: string
   element.setAttribute("content", content);
 }
 
+const SHARE_PHOTO = "/2022.webp";
+const SHARE_FALLBACK = "/favicon.jpg";
+
 function absoluteUrl(origin: string, value: string): string {
   if (value.startsWith("http://") || value.startsWith("https://")) {
     return value;
@@ -29,12 +32,42 @@ function absoluteUrl(origin: string, value: string): string {
   return `${origin}${value.startsWith("/") ? value : `/${value}`}`;
 }
 
+let shareGeneration = 0;
+
+function isShareFallback(path: string): boolean {
+  return path === SHARE_FALLBACK;
+}
+
+function publishShareImage(origin: string, path: string) {
+  const image = absoluteUrl(origin, path);
+  upsertMeta("property", "og:image", image);
+  upsertMeta("name", "twitter:image", image);
+  upsertMeta("name", "twitter:card", isShareFallback(path) ? "summary" : "summary_large_image");
+  return image;
+}
+
+function setShareImage(origin: string, path?: string | null) {
+  const generation = ++shareGeneration;
+  const preferred = path || SHARE_PHOTO;
+  const image = publishShareImage(origin, preferred);
+  if (isShareFallback(preferred)) {
+    return;
+  }
+  const probe = new Image();
+  probe.onerror = () => {
+    const current = document.head.querySelector('meta[property="og:image"]')?.getAttribute("content");
+    if (generation === shareGeneration && current === image) {
+      publishShareImage(origin, SHARE_FALLBACK);
+    }
+  };
+  probe.src = image;
+}
+
 export function applyDocumentSeo(seo: DocumentSeo): void {
   const origin = window.location.origin;
   const path = cleanPath(seo.canonicalPath || seo.pathname);
   const url = `${origin}${path === "/" ? "/" : path}`;
   const title = seo.title.includes(SITE.shortName) ? seo.title : `${seo.title} · ${SITE.shortName}`;
-  const image = absoluteUrl(origin, seo.image || "/favicon.jpg");
   const robots = seo.robots || robotsForPath(seo.pathname);
 
   document.title = title;
@@ -44,13 +77,11 @@ export function applyDocumentSeo(seo: DocumentSeo): void {
   upsertMeta("property", "og:description", seo.description);
   upsertMeta("property", "og:type", seo.type ?? "website");
   upsertMeta("property", "og:url", url);
-  upsertMeta("property", "og:image", image);
+  setShareImage(origin, seo.image);
   upsertMeta("property", "og:site_name", SITE.shortName);
   upsertMeta("property", "og:locale", "en_IN");
-  upsertMeta("name", "twitter:card", "summary_large_image");
   upsertMeta("name", "twitter:title", title);
   upsertMeta("name", "twitter:description", seo.description);
-  upsertMeta("name", "twitter:image", image);
 
   let canonical = document.head.querySelector('link[rel="canonical"]');
   if (!canonical) {
@@ -80,9 +111,7 @@ export function applySeoOverride(override: {
     upsertMeta("name", "twitter:description", override.description);
   }
   if (override.image) {
-    const image = absoluteUrl(origin, override.image);
-    upsertMeta("property", "og:image", image);
-    upsertMeta("name", "twitter:image", image);
+    setShareImage(origin, override.image);
   }
   if (override.robots) {
     upsertMeta("name", "robots", override.robots);
