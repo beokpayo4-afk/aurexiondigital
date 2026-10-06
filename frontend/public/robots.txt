@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /account
+Disallow: /orders
+Disallow: /checkout
+Disallow: /cart
+Disallow: /learn
+Disallow: /login
+Disallow: /register
+Disallow: /order-success
+Disallow: /academy/login
+Disallow: /academy/register
+Disallow: /academy/dashboard
+Disallow: /academy/course/*/learn
+
+Sitemap: /sitemap.xml
