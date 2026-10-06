@@ -44,21 +44,55 @@ export function SolutionView({ service }: SolutionViewProps) {
       />
 
       {content.introduction ? (
-        <section className="bg-paper" aria-labelledby="introduction-heading">
-          <Container className="py-16 sm:py-20">
-            <SectionHeading id="introduction-heading" title="About this service" />
-            <p className="mt-6 max-w-3xl text-base leading-7 text-ink/80">{content.introduction}</p>
+        <section className="bg-paper" aria-label="About this service">
+          <Container className="max-w-3xl space-y-5 py-16 sm:py-20">
+            {content.introduction.split(/\n\n+/).map((paragraph) => (
+              <p key={paragraph} className="text-base leading-7 text-ink/80">
+                {paragraph}
+              </p>
+            ))}
           </Container>
         </section>
       ) : null}
 
-      {included.length > 0 ? (
+      {content.offers.length > 0 ? (
+        <section className="bg-white" aria-labelledby="offers-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="offers-heading" title={content.offersTitle ?? "What we offer"} />
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
+              {content.offers.map((offer) => (
+                <Card key={offer.title} className="h-full">
+                  <h3 className="text-xl font-semibold">{offer.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-ink/75">{offer.detail}</p>
+                </Card>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {content.offers.length === 0 && included.length > 0 ? (
         <section className="bg-white" aria-labelledby="included-heading">
           <Container className="py-16 sm:py-20">
             <SectionHeading id="included-heading" title="Included" />
             <div className="mt-8">
               <ActivityList activities={included} />
             </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {content.why.length > 0 ? (
+        <section className="bg-paper" aria-labelledby="why-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="why-heading" title={content.whyTitle ?? "Why choose this service"} />
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {content.why.map((item) => (
+                <li key={item} className="rounded-xl border border-line bg-white px-5 py-4 text-sm leading-6 text-ink/80">
+                  {item}
+                </li>
+              ))}
+            </ul>
           </Container>
         </section>
       ) : null}
@@ -123,7 +157,7 @@ export function SolutionView({ service }: SolutionViewProps) {
       {content.process.length > 0 ? (
         <section className="bg-paper" aria-labelledby="process-heading">
           <Container className="py-16 sm:py-20">
-            <SectionHeading id="process-heading" title="How it works" />
+            <SectionHeading id="process-heading" title={content.processTitle ?? "How it works"} />
             <ol className="mt-8 grid gap-5 md:grid-cols-2">
               {content.process.map((step, index) => (
                 <li key={step.title}>
@@ -135,6 +169,21 @@ export function SolutionView({ service }: SolutionViewProps) {
                 </li>
               ))}
             </ol>
+          </Container>
+        </section>
+      ) : null}
+
+      {content.audience.length > 0 ? (
+        <section className="bg-white" aria-labelledby="audience-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="audience-heading" title={content.audienceTitle ?? "Who we help"} />
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {content.audience.map((item) => (
+                <li key={item} className="text-sm leading-6 text-ink/80">
+                  {item}
+                </li>
+              ))}
+            </ul>
           </Container>
         </section>
       ) : null}
@@ -151,9 +200,12 @@ export function SolutionView({ service }: SolutionViewProps) {
       ) : null}
 
       <CTASection
-        title={`Ask about ${service.name}.`}
-        description="Send an enquiry for this service. Final pricing is confirmed after consultation, and media placement is included only when it is confirmed."
-        primary={{ to: enquiryHref, label: "Send an enquiry" }}
+        title={content.ctaTitle ?? `Ask about ${service.name}.`}
+        description={
+          content.ctaDescription ??
+          "Send an enquiry for this service. Final pricing is confirmed after consultation, and media placement is included only when it is confirmed."
+        }
+        primary={{ to: enquiryHref, label: content.ctaLabel ?? "Send an enquiry" }}
         secondary={{ to: "/contact", label: "Contact" }}
       />
 
