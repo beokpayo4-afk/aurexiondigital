@@ -10,8 +10,8 @@ export function ShopPage() {
     <>
       <PageIntro
         eyebrow="Shop"
-        title="Products offered for purchase."
-        description="Published products on the shop channel can be searched, filtered, and added to the cart when they have a price."
+        title="Shop"
+        description="Digital products, software, SaaS tools, and business resources. Search the list and add an item to the cart when it has a price."
       />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20">

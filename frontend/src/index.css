@@ -33,10 +33,7 @@ textarea.field {
 }
 
 .surface-dark {
-  background-color: #e7f2fc;
-  background-image:
-    radial-gradient(ellipse at top right, rgba(47, 164, 255, 0.28), transparent 42%),
-    linear-gradient(165deg, #f7fbff 0%, #d7eafb 52%, #eef6ff 100%);
+  background-color: #ffffff;
   color: #102033;
 }
 

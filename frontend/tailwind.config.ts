@@ -7,7 +7,7 @@ export default {
       colors: {
         night: "#102033",
         ink: "#17191f",
-        paper: "#eef3f7",
+        paper: "#f6f3ee",
         champagne: "#c6a56a",
         "champagne-deep": "#6e5128",
         mist: "#8d97a6",
@@ -18,7 +18,7 @@ export default {
         display: ["Cormorant Garamond", "Palatino Linotype", "Palatino", "serif"],
       },
       boxShadow: {
-        card: "0 22px 50px -34px rgba(16, 18, 24, 0.55)",
+        card: "none",
       },
       maxWidth: {
         page: "96rem",

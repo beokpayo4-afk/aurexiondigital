@@ -16,7 +16,7 @@ import { courseData } from "@/seo/structuredData";
 export function AcademyCoursePage() {
   const { slug = "" } = useParams();
   const course = useAsyncData(() => getCourseOutline(slug), [slug]);
-  usePageTitle(course.data?.title ?? "Course", course.data?.summary || "Published Academy course.");
+  usePageTitle(course.data?.title ?? "Course", course.data?.summary || undefined);
 
   if (course.loading) {
     return (
@@ -64,7 +64,7 @@ export function AcademyCoursePage() {
       <PageIntro
         eyebrow="Aurexion Academy"
         title={course.data.title}
-        description={course.data.summary ?? "Published Academy course."}
+        description={course.data.summary ?? course.data.title}
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Academy", to: "/academy" },

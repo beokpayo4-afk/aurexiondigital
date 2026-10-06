@@ -20,8 +20,8 @@ export function SolutionsPage() {
     <>
       <PageIntro
         eyebrow="Solutions"
-        title="Growth services."
-        description="Each service page reads the published record, including packages and starting prices when they are set."
+        title="Marketing and business services"
+        description="Digital marketing, advertising, creative work, lead generation, consulting, trade support, and outsourcing."
       />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20 lg:py-24">
@@ -33,9 +33,9 @@ export function SolutionsPage() {
               return (
                 <Reveal key={item.slug} delay={index * 0.04}>
                   <Card interactive className="flex h-full flex-col">
-                    <h2 className="font-display text-4xl">{service?.name ?? item.title}</h2>
+                    <h2 className="text-2xl font-semibold leading-snug">{service?.name ?? item.title}</h2>
                     <p className="mt-4 flex-1 text-sm leading-6 text-ink/75">
-                      {service?.summary ?? "This service is not published yet."}
+                      {service?.summary ?? "Details for this service are being added."}
                     </p>
                     <Link to={`/solutions/${item.slug}`} className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-champagne-deep">
                       View service

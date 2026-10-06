@@ -21,7 +21,7 @@ const AREA = "technology-digital-products";
 export function TechnologyTrackPage() {
   const { slug = "" } = useParams();
   const track = technologyTrack(slug);
-  usePageTitle(track?.title ?? "Technology", track ? `Published ${track.title} services and products.` : undefined);
+  usePageTitle(track?.title ?? "Technology", track ? `${track.title} services and products.` : undefined);
   const services = useAsyncData(() => listServices({ business_area: AREA }), [Boolean(track)], { enabled: Boolean(track) });
   const productType = track?.productType ?? "";
   const products = useAsyncData(() => listProducts({ product_type: productType }), [productType], { enabled: Boolean(productType) });
@@ -42,7 +42,7 @@ export function TechnologyTrackPage() {
         <Container className="py-20">
           <EmptyState
             title="This technology page is not available"
-            description="Choose a published technology service from the technology section."
+            description="Go back to the technology page and choose an area."
             action={
               <Button to="/technology" tone="light">
                 Technology
@@ -59,7 +59,7 @@ export function TechnologyTrackPage() {
       <PageIntro
         eyebrow="Technology"
         title={track.title}
-        description={matched[0]?.summary ?? "Published services and products for this part of Aurexion Technology."}
+        description={matched[0]?.summary ?? `${track.title} at Aurexion Digital.`}
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Technology", to: "/technology" },
@@ -73,7 +73,7 @@ export function TechnologyTrackPage() {
             {services.loading ? <LoadingState label="Loading services" /> : null}
             {services.error ? <ErrorState message={services.error} onRetry={services.reload} /> : null}
             {!services.loading && !services.error && matched.length === 0 ? (
-              <EmptyState title="No published services" description="Services for this page appear when they are published." />
+              <EmptyState title="No services listed yet" description="You can still send a project enquiry from the technology page." />
             ) : null}
             {matched.length > 0 ? (
               <div className="grid gap-5 md:grid-cols-2">

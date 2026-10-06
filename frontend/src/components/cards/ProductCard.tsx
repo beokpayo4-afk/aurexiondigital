@@ -20,8 +20,8 @@ export function ProductCard({ name, summary, productType, amount, currency = "IN
 
   return (
     <Card interactive className="flex h-full flex-col">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-champagne-deep">{formatProductType(productType)}</p>
-      <h3 className="mt-3 font-display text-3xl leading-tight">{name}</h3>
+      <p className="text-sm text-champagne-deep">{formatProductType(productType)}</p>
+      <h3 className="mt-2 text-xl font-semibold leading-snug">{name}</h3>
       {summary ? <p className="mt-3 text-sm leading-6 text-ink/75">{summary}</p> : null}
       {price ? (
         <p className="mt-6 text-sm font-semibold text-ink">

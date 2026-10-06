@@ -9,12 +9,12 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { listCourses } from "@/services/catalogService";
 
 export function AcademyCoursesPage() {
-  usePageTitle("Courses", "Published Aurexion Academy courses and prices.");
+  usePageTitle("Courses", "Aurexion Academy courses and their prices.");
   const courses = useAsyncData(() => listCourses(), []);
 
   return (
     <>
-      <PageIntro eyebrow="Aurexion Academy" title="Courses" description="Prices shown here are the published course prices." />
+      <PageIntro eyebrow="Aurexion Academy" title="Courses" description="Prices shown here are the course prices." />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20">
           {courses.loading ? <LoadingState label="Loading courses" /> : null}

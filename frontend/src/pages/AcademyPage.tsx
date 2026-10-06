@@ -15,7 +15,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { listCourses } from "@/services/catalogService";
 
 export function AcademyPage() {
-  usePageTitle("Academy", "Published Aurexion Academy courses.");
+  usePageTitle("Academy", "Courses, workshops, and training from Aurexion Academy.");
   const courses = useAsyncData(() => listCourses(), []);
   const { isAuthenticated } = useAuth();
   const activities = AREAS.find((area) => area.id === "education-academy")?.activities ?? [];
@@ -24,8 +24,8 @@ export function AcademyPage() {
     <>
       <PageIntro
         eyebrow="Aurexion Academy"
-        title="Training and digital learning."
-        description="Published courses are listed with their prices. Lesson material opens after payment and enrollment."
+        title="Aurexion Academy"
+        description="Courses are listed with their prices. Lessons open after payment and enrollment."
       />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20">
@@ -47,12 +47,12 @@ export function AcademyPage() {
             {courses.loading ? <LoadingState label="Loading courses" /> : null}
             {courses.error ? <ErrorState message={courses.error} onRetry={courses.reload} /> : null}
             {!courses.loading && !courses.error && courses.data?.items.length === 0 ? (
-              <EmptyState title="No published courses" description="Courses appear in the Academy after they are published." />
+              <EmptyState title="No courses listed yet" description="Check back, or ask about training from the contact page." />
             ) : null}
             {courses.data && courses.data.items.length > 0 ? <CourseGrid courses={courses.data.items} /> : null}
           </div>
-          <h2 className="mt-16 font-display text-4xl sm:text-5xl">Stated activities</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/70">These are the education objects. They are not course titles.</p>
+          <h2 className="mt-16 text-2xl font-semibold">Training the company offers</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/70">These are areas of training, not the names of courses.</p>
           <div className="mt-8">
             <ActivityList activities={activities} />
           </div>

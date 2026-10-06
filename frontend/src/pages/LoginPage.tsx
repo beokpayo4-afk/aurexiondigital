@@ -18,7 +18,7 @@ export function LoginPage() {
     <section className="bg-paper">
       <Container className="py-16 sm:py-20">
         <div className="max-w-md rounded-xl border border-line bg-white p-6 shadow-card sm:p-8">
-          <h1 className="font-display text-5xl">Sign in</h1>
+          <h1 className="text-3xl font-semibold">Sign in</h1>
           <p className="mt-4 text-sm leading-6 text-ink/75">Customer and student access uses this account.</p>
           <div className="mt-8">
             <LoginForm />

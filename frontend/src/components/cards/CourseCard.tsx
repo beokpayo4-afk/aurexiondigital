@@ -23,13 +23,11 @@ export function CourseCard({ title, summary, level, duration, priceAmount, curre
     <Card interactive className="flex h-full flex-col">
       {thumbnailUrl ? (
         <ContentImage src={thumbnailUrl} alt="" className="mb-5 aspect-video w-full rounded-md object-cover" />
-      ) : (
-        <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-ink/45">No thumbnail</p>
-      )}
-      {meta ? <p className="text-xs font-semibold uppercase tracking-[0.18em] text-champagne-deep">{meta}</p> : null}
-      <h3 className={`font-display text-3xl leading-tight ${meta ? "mt-3" : ""}`}>{title}</h3>
+      ) : null}
+      {meta ? <p className="text-sm text-champagne-deep">{meta}</p> : null}
+      <h3 className={`text-xl font-semibold leading-snug ${meta ? "mt-2" : ""}`}>{title}</h3>
       {summary ? <p className="mt-3 text-sm leading-6 text-ink/75">{summary}</p> : null}
-      {price ? <p className="mt-6 text-sm font-semibold text-ink">{price}</p> : <p className="mt-6 text-sm text-ink/60">Price is not published</p>}
+      {price ? <p className="mt-6 text-sm font-semibold text-ink">{price}</p> : null}
       {href ? (
         <Link to={href} className="mt-auto inline-flex min-h-11 items-center pt-6 text-sm font-semibold text-champagne-deep hover:text-night">
           View course

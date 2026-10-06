@@ -34,7 +34,7 @@ export function applyDocumentSeo(seo: DocumentSeo): void {
   const path = cleanPath(seo.canonicalPath || seo.pathname);
   const url = `${origin}${path === "/" ? "/" : path}`;
   const title = seo.title.includes(SITE.shortName) ? seo.title : `${seo.title} · ${SITE.shortName}`;
-  const image = absoluteUrl(origin, seo.image || "/hero.jpg");
+  const image = absoluteUrl(origin, seo.image || "/favicon.jpg");
   const robots = seo.robots || robotsForPath(seo.pathname);
 
   document.title = title;

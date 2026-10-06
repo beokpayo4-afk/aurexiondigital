@@ -7,7 +7,7 @@ export type PageSeo = {
 
 export const PAGE_SEO: Record<string, PageSeo> = {
   "/": {
-    title: "Technology. Marketing. Growth.",
+    title: "Aurexion Digital",
     description: SITE.description,
   },
   "/solutions": {
@@ -24,11 +24,11 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   },
   "/academy": {
     title: "Academy",
-    description: "Published Aurexion Academy courses.",
+    description: "Courses, workshops, and training from Aurexion Academy.",
   },
   "/academy/courses": {
     title: "Courses",
-    description: "Published Aurexion Academy courses and prices.",
+    description: "Aurexion Academy courses and their prices.",
   },
   "/about": {
     title: "About Us",

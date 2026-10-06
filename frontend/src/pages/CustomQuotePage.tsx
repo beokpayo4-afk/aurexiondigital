@@ -40,15 +40,15 @@ export function CustomQuotePage() {
       <PageIntro
         eyebrow="Custom Quote"
         title="Build Your Own Marketing Campaign."
-        description="Select the channels you want and describe the campaign. This sends a quote request. It does not confirm a price or a media placement."
+        description="Choose the channels and describe the campaign. Sending this form asks for a quote. It does not confirm a price or a media booking."
       />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20">
           {sent ? (
             <div className="max-w-2xl rounded-xl border border-line bg-white p-8 shadow-card" role="status">
-              <h2 className="font-display text-4xl">Request received.</h2>
+              <h2 className="text-2xl font-semibold">Request received.</h2>
               <p className="mt-4 text-sm leading-6 text-ink/75">
-                The custom quote request has been recorded. A response will use the details you submitted.
+                Thanks. We have the campaign details and will reply on the phone or email you entered.
               </p>
             </div>
           ) : (

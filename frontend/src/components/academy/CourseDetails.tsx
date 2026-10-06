@@ -40,42 +40,41 @@ export function CourseDetails({ course }: CourseDetailsProps) {
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
       <div>
         {course.thumbnail_url ? (
-          <ContentImage src={course.thumbnail_url} alt="" className="aspect-video w-full rounded-xl object-cover" />
-        ) : (
-          <p className="rounded-xl border border-dashed border-line px-6 py-10 text-sm text-ink/60">No thumbnail is published.</p>
-        )}
-        <p className="mt-6 text-sm leading-7 text-ink/80">{course.description ?? "No description is published."}</p>
-        <h2 className="mt-10 font-display text-3xl">Learning outcomes</h2>
+          <ContentImage src={course.thumbnail_url} alt="" className="aspect-video w-full rounded-md object-cover" />
+        ) : null}
+        {course.description ? <p className="mt-6 text-sm leading-7 text-ink/80">{course.description}</p> : null}
         {course.learning_outcomes.length > 0 ? (
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-ink/80">
-            {course.learning_outcomes.map((outcome) => (
-              <li key={outcome}>{outcome}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-sm text-ink/70">No learning outcomes are published.</p>
-        )}
-        <h2 className="mt-10 font-display text-3xl">Curriculum</h2>
+          <>
+            <h2 className="mt-10 text-2xl font-semibold">What you will cover</h2>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-ink/80">
+              {course.learning_outcomes.map((outcome) => (
+                <li key={outcome}>{outcome}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        <h2 className="mt-10 text-2xl font-semibold">Lessons</h2>
         <div className="mt-4">
           <CourseCurriculum modules={course.modules} locked />
         </div>
-        <h2 className="mt-10 font-display text-3xl">Resources</h2>
-        {course.resources.length === 0 ? <p className="mt-4 text-sm text-ink/70">No downloadable resources are published.</p> : null}
-        <ul className="mt-4 space-y-2 text-sm">
-          {course.resources.map((resource) => (
-            <li key={resource.id}>{resource.title}</li>
-          ))}
-        </ul>
+        {course.resources.length > 0 ? (
+          <>
+            <h2 className="mt-10 text-2xl font-semibold">Files</h2>
+            <ul className="mt-4 space-y-2 text-sm">
+              {course.resources.map((resource) => (
+                <li key={resource.id}>{resource.title}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
       </div>
       <aside className="h-fit rounded-xl border border-line bg-white p-6 shadow-card">
-        <p className="font-display text-4xl">{price ?? "Price is not published"}</p>
-        <p className="mt-3 text-sm text-ink/70">{course.level ?? "Level is not published."}</p>
-        <p className="mt-1 text-sm text-ink/70">{course.duration_label ?? "Duration is not published."}</p>
-        <p className="mt-4 text-sm leading-6 text-ink/70">
-          {course.certificate_enabled
-            ? "A certificate is issued when every lesson is completed."
-            : "A certificate is not enabled for this course."}
-        </p>
+        <p className="text-2xl font-semibold">{price ?? "Price on request"}</p>
+        {course.level ? <p className="mt-3 text-sm text-ink/70">{course.level}</p> : null}
+        {course.duration_label ? <p className="mt-1 text-sm text-ink/70">{course.duration_label}</p> : null}
+        {course.certificate_enabled ? (
+          <p className="mt-4 text-sm leading-6 text-ink/70">A certificate is issued when every lesson is completed.</p>
+        ) : null}
         {enrolled ? (
           <button
             type="button"

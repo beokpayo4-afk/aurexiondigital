@@ -9,7 +9,6 @@ import { Reveal } from "@/components/motion/Reveal";
 import { CTASection } from "@/components/ui/CTASection";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { FAQ } from "@/components/ui/FAQ";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { PRICING_DISCLAIMER } from "@/constants/solutions";
@@ -33,7 +32,7 @@ export function SolutionView({ service }: SolutionViewProps) {
       <PageIntro
         eyebrow="Solutions"
         title={service.name}
-        description={service.summary ?? "Published service."}
+        description={service.summary ?? service.name}
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Solutions", to: "/solutions" },
@@ -41,58 +40,47 @@ export function SolutionView({ service }: SolutionViewProps) {
         ]}
       />
 
-      <section className="bg-paper" aria-labelledby="introduction-heading">
-        <Container className="py-16 sm:py-20">
-          <SectionHeading id="introduction-heading" eyebrow="Introduction" title="What this service covers." />
-          <div className="mt-8 max-w-3xl">
-            {content.introduction ? (
-              <p className="text-base leading-7 text-ink/80">{content.introduction}</p>
-            ) : (
-              <EmptyState title="No introduction published" description="The service introduction appears here when it is published." />
-            )}
-          </div>
-        </Container>
-      </section>
+      {content.introduction ? (
+        <section className="bg-paper" aria-labelledby="introduction-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="introduction-heading" title="About this service" />
+            <p className="mt-6 max-w-3xl text-base leading-7 text-ink/80">{content.introduction}</p>
+          </Container>
+        </section>
+      ) : null}
 
-      <section className="bg-white" aria-labelledby="included-heading">
-        <Container className="py-16 sm:py-20">
-          <SectionHeading id="included-heading" eyebrow="Scope" title="Services included" />
-          <div className="mt-8">
-            {included.length > 0 ? (
+      {included.length > 0 ? (
+        <section className="bg-white" aria-labelledby="included-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="included-heading" title="Included" />
+            <div className="mt-8">
               <ActivityList activities={included} />
-            ) : (
-              <EmptyState title="No included services published" description="Included work appears here when it is published on this service." />
-            )}
-          </div>
-        </Container>
-      </section>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
-      <section className="bg-paper" aria-labelledby="benefits-heading">
-        <Container className="py-16 sm:py-20">
-          <SectionHeading id="benefits-heading" eyebrow="Benefits" title="Benefits" />
-          <div className="mt-8">
-            {content.benefits.length > 0 ? (
-              <div className="grid gap-5 md:grid-cols-2">
-                {content.benefits.map((benefit) => (
-                  <Card key={benefit}>
-                    <p className="text-sm leading-6 text-ink/80">{benefit}</p>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <EmptyState title="No benefits published" description="Benefits appear here when they are published for this service." />
-            )}
-          </div>
-        </Container>
-      </section>
+      {content.benefits.length > 0 ? (
+        <section className="bg-paper" aria-labelledby="benefits-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="benefits-heading" title="What this is for" />
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
+              {content.benefits.map((benefit) => (
+                <Card key={benefit}>
+                  <p className="text-sm leading-6 text-ink/80">{benefit}</p>
+                </Card>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <section className="bg-white" aria-labelledby="packages-heading">
         <Container className="py-16 sm:py-20">
           <SectionHeading
             id="packages-heading"
-            eyebrow="Packages"
-            title="Packages and starting prices"
-            description="A price on a package is a starting price for the Aurexion service fee."
+            title="Packages"
+            description="A price on a package is a starting price for the service fee."
           />
           <div className="mt-8">
             {service.packages.length > 0 ? (
@@ -111,10 +99,7 @@ export function SolutionView({ service }: SolutionViewProps) {
                 ))}
               </div>
             ) : (
-              <EmptyState
-                title="No published packages"
-                description="Packages appear here when they are published. An enquiry can still describe the work."
-              />
+              <p className="text-sm leading-6 text-ink/75">Packages for this service are confirmed when you enquire.</p>
             )}
           </div>
           {content.managementFeeNote ? (
@@ -124,41 +109,35 @@ export function SolutionView({ service }: SolutionViewProps) {
         </Container>
       </section>
 
-      <section className="bg-paper" aria-labelledby="process-heading">
-        <Container className="py-16 sm:py-20">
-          <SectionHeading id="process-heading" eyebrow="Process" title="Process" />
-          <div className="mt-8">
-            {content.process.length > 0 ? (
-              <ol className="grid gap-5 md:grid-cols-2">
-                {content.process.map((step, index) => (
-                  <li key={step.title}>
-                    <Card className="h-full">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-champagne-deep">Step {index + 1}</p>
-                      <h3 className="mt-3 font-display text-3xl">{step.title}</h3>
-                      <p className="mt-3 text-sm leading-6 text-ink/75">{step.detail}</p>
-                    </Card>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <EmptyState title="No process published" description="The working process appears here when it is published for this service." />
-            )}
-          </div>
-        </Container>
-      </section>
+      {content.process.length > 0 ? (
+        <section className="bg-paper" aria-labelledby="process-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="process-heading" title="How it works" />
+            <ol className="mt-8 grid gap-5 md:grid-cols-2">
+              {content.process.map((step, index) => (
+                <li key={step.title}>
+                  <Card className="h-full">
+                    <p className="text-sm text-champagne-deep">{index + 1}</p>
+                    <h3 className="mt-2 text-xl font-semibold">{step.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-ink/75">{step.detail}</p>
+                  </Card>
+                </li>
+              ))}
+            </ol>
+          </Container>
+        </section>
+      ) : null}
 
-      <section className="bg-white" aria-labelledby="faq-heading">
-        <Container className="py-16 sm:py-20">
-          <SectionHeading id="faq-heading" eyebrow="Questions" title="FAQ" />
-          <div className="mt-8">
-            {content.faqs.length > 0 ? (
+      {content.faqs.length > 0 ? (
+        <section className="bg-white" aria-labelledby="faq-heading">
+          <Container className="py-16 sm:py-20">
+            <SectionHeading id="faq-heading" title="Questions" />
+            <div className="mt-8">
               <FAQ items={content.faqs} />
-            ) : (
-              <EmptyState title="No questions published" description="Questions for this service appear here when they are published." />
-            )}
-          </div>
-        </Container>
-      </section>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <CTASection
         title={`Ask about ${service.name}.`}
@@ -170,7 +149,7 @@ export function SolutionView({ service }: SolutionViewProps) {
       <section id="enquire" className="bg-paper" aria-labelledby="enquire-heading">
         <Container className="py-16 sm:py-20">
           <Reveal>
-            <SectionHeading id="enquire-heading" eyebrow="Enquiry" title="Enquiry form" description={`This form is for ${service.name}.`} />
+            <SectionHeading id="enquire-heading" title={`Ask about ${service.name}`} description="Send the details and we will reply from this enquiry." />
           </Reveal>
           <div className="mt-8">
             <SolutionEnquiryForm serviceId={service.id} serviceName={service.name} />

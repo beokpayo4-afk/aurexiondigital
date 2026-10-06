@@ -61,7 +61,7 @@ export function ShopCatalog({ categorySlug }: ShopCatalogProps) {
         <EmptyState title="This category is not published" description="Choose another shop category." />
       ) : null}
       {categoryReady && !products.loading && !products.error && products.data?.items.length === 0 ? (
-        <EmptyState title="No products match" description="Published shop products appear here when they match the filters." />
+        <EmptyState title="No products match" description="Try a different search or category." />
       ) : null}
       {products.data && products.data.items.length > 0 ? <ProductGrid products={products.data.items} onAdd={(product) => void add(product.id)} /> : null}
     </div>

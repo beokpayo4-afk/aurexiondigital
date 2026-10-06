@@ -14,5 +14,5 @@ export function Card({ children, className = "", tone = "paper", interactive = f
       : "border-line bg-white text-ink shadow-card";
   const hover = interactive ? "transition-colors hover:border-champagne-deep" : "";
 
-  return <article className={`min-w-0 rounded-xl border p-6 sm:p-7 ${surface} ${hover} ${className}`}>{children}</article>;
+  return <article className={`min-w-0 rounded-md border p-5 sm:p-6 ${surface} ${hover} ${className}`}>{children}</article>;
 }

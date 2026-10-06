@@ -21,7 +21,7 @@ export function ShopProductPage() {
   const product = useAsyncData(() => getProduct(slug), [slug]);
   const record = product.data;
   const shopListed = record && (record.listing_channel === "shop" || record.listing_channel === "both");
-  usePageTitle(record?.name ?? "Product", record?.summary || "Published shop product.");
+  usePageTitle(record?.name ?? "Product", record?.summary || undefined);
   const price = record?.prices.find((item) => item.is_active) ?? record?.prices[0];
 
   if (product.loading) {
@@ -70,7 +70,7 @@ export function ShopProductPage() {
       <PageIntro
         eyebrow="Shop"
         title={record.name}
-        description={record.summary ?? "Published shop product."}
+        description={record.summary ?? record.name}
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Shop", to: "/shop" },
@@ -100,7 +100,7 @@ export function ShopProductPage() {
             ) : null}
           </div>
           <div className="rounded-xl border border-line bg-white p-6 shadow-card">
-            <p className="font-display text-4xl">{price ? formatMoney(price.amount, price.currency) : "Price not published"}</p>
+            <p className="text-2xl font-semibold">{price ? formatMoney(price.amount, price.currency) : "Price on request"}</p>
             {price?.billing_period ? <p className="mt-2 text-sm text-ink/70">{formatBilling(price.billing_period)}</p> : null}
             {price ? (
               <button type="button" className="mt-6 min-h-11 rounded-md bg-champagne px-5 text-sm font-semibold text-night" onClick={() => void add(record.id)}>

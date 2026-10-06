@@ -12,14 +12,14 @@ export function ShopCategoryPage() {
   const categories = useAsyncData(() => listShopCategories(), []);
   const category = categories.data?.find((item) => item.slug === slug);
   const title = category?.name ?? "Shop category";
-  usePageTitle(title, "Published products in this shop category.");
+  usePageTitle(title, "Products in this shop category.");
 
   return (
     <>
       <PageIntro
         eyebrow="Shop"
         title={title}
-        description="Published products in this shop category."
+        description="Products in this shop category."
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Shop", to: "/shop" },

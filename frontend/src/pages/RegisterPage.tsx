@@ -17,7 +17,7 @@ export function RegisterPage() {
     <section className="bg-paper">
       <Container className="py-16 sm:py-20">
         <div className="max-w-md rounded-xl border border-line bg-white p-6 shadow-card sm:p-8">
-          <h1 className="font-display text-5xl">Create account</h1>
+          <h1 className="text-3xl font-semibold">Create account</h1>
           <p className="mt-4 text-sm leading-6 text-ink/75">Registration creates a customer account.</p>
           <div className="mt-8">
             <RegisterForm />

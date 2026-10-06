@@ -91,7 +91,7 @@ export function ProductDetailPage() {
       <PageIntro
         eyebrow="Technology"
         title={record.name}
-        description={record.summary ?? "Published product."}
+        description={record.summary ?? record.name}
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Technology", to: "/technology" },

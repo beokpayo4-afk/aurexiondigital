@@ -25,7 +25,7 @@ export function PackageCard({
 
   return (
     <Card className="flex h-full flex-col">
-      <h3 className="font-display text-3xl leading-tight">{name}</h3>
+      <h3 className="text-xl font-semibold leading-snug">{name}</h3>
       {summary ? <p className="mt-3 text-sm leading-6 text-ink/75">{summary}</p> : null}
       {features.length > 0 ? (
         <ul className="mt-4 space-y-2 text-sm leading-6 text-ink/75">
@@ -41,7 +41,7 @@ export function PackageCard({
           {billing ? <span className="font-normal text-ink/60"> · {billing}</span> : null}
         </p>
       ) : (
-        <p className="mt-6 text-sm text-ink/60">Starting price is not published for this package.</p>
+        <p className="mt-6 text-sm text-ink/60">Starting price is confirmed when you enquire.</p>
       )}
     </Card>
   );

@@ -14,12 +14,8 @@ export function SectionHeading({ eyebrow, title, description, as = "h2", tone = 
 
   return (
     <div className="max-w-3xl">
-      {eyebrow ? (
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-champagne-deep">
-          {eyebrow}
-        </p>
-      ) : null}
-      <Heading id={id} className={`text-balance font-display text-4xl leading-tight sm:text-5xl lg:text-6xl ${titleClass} ${eyebrow ? "mt-4" : ""}`}>
+      {eyebrow ? <p className="text-sm text-champagne-deep">{eyebrow}</p> : null}
+      <Heading id={id} className={`text-balance text-3xl font-semibold leading-snug sm:text-4xl ${titleClass} ${eyebrow ? "mt-2" : ""}`}>
         {title}
       </Heading>
       {description ? <p className={`mt-5 text-base leading-7 sm:text-lg ${bodyClass}`}>{description}</p> : null}

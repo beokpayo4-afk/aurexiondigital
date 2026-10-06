@@ -37,22 +37,22 @@ export function ContactPage() {
     <>
       <PageIntro
         eyebrow="Contact"
-        title="Send a message."
-        description="Tell us what you want to promote or build. This form records a contact message. It is separate from a quote request."
+        title="Contact"
+        description="Tell us what you want to promote or build. For a priced campaign, use Custom Quote."
       />
       <section className="bg-paper">
         <Container className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div>
-            <h2 className="font-display text-4xl">Reach us</h2>
+            <h2 className="text-2xl font-semibold">Reach us</h2>
             <div className="mt-6">
               <ContactDetails />
             </div>
           </div>
           {sent ? (
             <div className="rounded-xl border border-line bg-white p-8 shadow-card" role="status">
-              <h2 className="font-display text-4xl">Message received.</h2>
+              <h2 className="text-2xl font-semibold">Message received.</h2>
               <p className="mt-4 text-sm leading-6 text-ink/75">
-                Your contact details have been recorded. Aurexion Digital will use the information you submitted.
+                Thanks. We have your message and will reply on the phone or email you entered.
               </p>
             </div>
           ) : (
