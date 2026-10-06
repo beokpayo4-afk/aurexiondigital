@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { PackageCard } from "@/components/cards/PackageCard";
 import { SolutionEnquiryForm } from "@/components/solutions/SolutionEnquiryForm";
@@ -12,6 +12,7 @@ import { Container } from "@/components/ui/Container";
 import { FAQ } from "@/components/ui/FAQ";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { PRICING_DISCLAIMER } from "@/constants/solutions";
+import { useCart } from "@/context/useCart";
 import type { Service } from "@/types/catalog";
 import { faqData, serviceData } from "@/seo/structuredData";
 import { readServiceContent } from "@/utils/serviceContent";
@@ -21,6 +22,8 @@ type SolutionViewProps = {
 };
 
 export function SolutionView({ service }: SolutionViewProps) {
+  const { addPackage } = useCart();
+  const navigate = useNavigate();
   const content = readServiceContent(service.description);
   const included = content.included.length > 0 ? content.included : featureLabels(service);
   const enquiryHref = `/solutions/${service.slug}#enquire`;
@@ -95,6 +98,14 @@ export function SolutionView({ service }: SolutionViewProps) {
                     billingPeriod={item.billing_period}
                     pricePrefix="Starting at"
                     features={(item.features ?? []).map((feature) => feature.label)}
+                    onAdd={item.price_amount ? () => void addPackage(item.id) : undefined}
+                    onBuy={
+                      item.price_amount
+                        ? () => {
+                            void addPackage(item.id, { open: false }).then(() => navigate("/checkout"));
+                          }
+                        : undefined
+                    }
                   />
                 ))}
               </div>

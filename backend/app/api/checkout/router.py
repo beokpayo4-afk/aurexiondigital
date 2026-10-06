@@ -8,7 +8,7 @@ from app.api.deps import get_current_user, get_db
 from app.api.files import download_response
 from app.api.http import call_api
 from app.models.auth import User
-from app.schemas.commerce import CheckoutRead, DownloadAvailability, PaymentSessionRead
+from app.schemas.commerce import CheckoutCreate, CheckoutRead, DownloadAvailability, PaymentSessionRead
 from app.services import commerce, payments
 
 router = APIRouter(tags=["payments"])
@@ -29,10 +29,11 @@ def payment_config() -> PaymentSessionRead:
 
 @router.post("/checkout", response_model=CheckoutRead, summary="Create an order from the signed-in cart")
 def checkout(
+    details: CheckoutCreate,
     session: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> CheckoutRead:
-    return call_api(lambda: commerce.checkout(session, user_id=user.id))
+    return call_api(lambda: commerce.checkout(session, user_id=user.id, details=details))
 
 
 @router.post("/payments/webhook", status_code=204, summary="Record a verified payment result")

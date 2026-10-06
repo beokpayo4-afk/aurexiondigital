@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     payment_currency: str = Field(default="INR", validation_alias=AliasChoices("PAYMENT_CURRENCY"))
     download_storage_dir: str = Field(default="", validation_alias=AliasChoices("DOWNLOAD_STORAGE_DIR"))
     public_site_url: str = Field(default="", validation_alias=AliasChoices("PUBLIC_SITE_URL"))
+    smtp_host: str = Field(default="", validation_alias=AliasChoices("SMTP_HOST"))
+    smtp_port: int = Field(default=587, validation_alias=AliasChoices("SMTP_PORT"))
+    smtp_username: str = Field(default="", validation_alias=AliasChoices("SMTP_USERNAME"))
+    smtp_password: str = Field(default="", validation_alias=AliasChoices("SMTP_PASSWORD"))
+    smtp_from: str = Field(default="", validation_alias=AliasChoices("SMTP_FROM"))
+    order_notify_email: str = Field(default="aurexiondigital@gmail.com", validation_alias=AliasChoices("ORDER_NOTIFY_EMAIL"))
 
     @field_validator("cors_origins")
     @classmethod

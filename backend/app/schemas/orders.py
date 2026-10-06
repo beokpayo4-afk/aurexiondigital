@@ -46,4 +46,19 @@ class OrderRead(BaseModel):
 
 
 class OrderDetail(OrderRead):
+    customer_name: str | None = None
+    customer_email: str | None = None
+    customer_phone: str | None = None
+    ship_line1: str | None = None
+    ship_line2: str | None = None
+    ship_city: str | None = None
+    ship_state: str | None = None
+    ship_postal_code: str | None = None
+    ship_country: str | None = None
+    bill_line1: str | None = None
+    bill_line2: str | None = None
+    bill_city: str | None = None
+    bill_state: str | None = None
+    bill_postal_code: str | None = None
+    bill_country: str | None = None
     payments: list[PaymentRead]

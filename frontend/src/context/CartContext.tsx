@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { addCartItem, claimCart, fetchCart, removeCartItem, updateCartItem, type Cart } from "@/services/shopService";
+import { addCartItem, addCartPackage, claimCart, fetchCart, removeCartItem, updateCartItem, type Cart } from "@/services/shopService";
 
 type CartContextValue = {
   cart: Cart | null;
   open: boolean;
   setOpen: (open: boolean) => void;
-  add: (productId: string) => Promise<void>;
+  add: (productId: string, options?: { open?: boolean }) => Promise<void>;
+  addPackage: (packageId: string, options?: { open?: boolean }) => Promise<void>;
   update: (itemId: string, quantity: number) => Promise<void>;
   remove: (itemId: string) => Promise<void>;
   refresh: () => Promise<void>;
@@ -52,9 +53,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       open,
       setOpen,
       refresh,
-      add: async (productId) => {
+      add: async (productId, options) => {
         setCart(await addCartItem(productId));
-        setOpen(true);
+        if (options?.open !== false) {
+          setOpen(true);
+        }
+      },
+      addPackage: async (packageId, options) => {
+        setCart(await addCartPackage(packageId));
+        if (options?.open !== false) {
+          setOpen(true);
+        }
       },
       update: async (itemId, quantity) => {
         setCart(await updateCartItem(itemId, quantity));

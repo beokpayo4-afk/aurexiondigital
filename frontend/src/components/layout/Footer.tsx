@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import logo from "@/assets/aurexion-logo.jpg";
 import { ContactDetails } from "@/components/company/ContactDetails";
 import { Container } from "@/components/ui/Container";
 import { PUBLIC_NAV } from "@/constants/navigation";
@@ -14,7 +15,8 @@ export function Footer() {
     <footer className="surface-dark mt-auto border-t border-night/10">
       <Container className="grid gap-10 py-14 sm:py-16 lg:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <p className="text-lg font-semibold">{SITE.shortName}</p>
+          <img src={logo} alt={SITE.name} className="h-16 w-auto rounded-md bg-white" />
+          <p className="mt-4 text-lg font-semibold">{SITE.name}</p>
           <p className="mt-3 max-w-sm text-sm leading-6 text-night/70">{SITE.positioning}</p>
           <div className="mt-6">
             <ContactDetails tone="dark" />
@@ -48,6 +50,26 @@ export function Footer() {
             <li>
               <Link to="/login" className="text-night/75 hover:text-night">
                 Sign in
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="text-night/75 hover:text-night">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="text-night/75 hover:text-night">
+                Terms & Conditions
+              </Link>
+            </li>
+            <li>
+              <Link to="/refunds" className="text-night/75 hover:text-night">
+                Refund Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/data-security" className="text-night/75 hover:text-night">
+                Data Security Policy
               </Link>
             </li>
           </ul>

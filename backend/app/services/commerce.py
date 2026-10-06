@@ -13,9 +13,11 @@ from app.core.config import settings
 from app.models.enums import ListingChannel, OrderItemType, OrderStatus, PaymentStatus
 from app.models.orders import Cart, CartItem, Order, OrderItem, Payment, PaymentTransaction
 from app.models.products import Product, ProductPrice
-from app.schemas.commerce import CartItemRead, CartRead, CheckoutRead, DownloadAvailability, PaymentSessionRead
+from app.models.services import Service, ServicePackage
+from app.schemas.commerce import CartItemRead, CartRead, CheckoutCreate, CheckoutRead, DownloadAvailability, PaymentSessionRead
 from app.services import payments
 from app.services.api_error import ApiError
+from app.services.mailer import send_order_confirmation
 
 _SHOP_CHANNELS = {ListingChannel.SHOP, ListingChannel.BOTH}
 
@@ -81,7 +83,9 @@ def _read_cart(session: Session, cart: Cart) -> CartRead:
         items.append(
             CartItemRead(
                 id=item.id,
+                item_type=OrderItemType.PRODUCT,
                 product_id=product.id,
+                package_id=None,
                 slug=product.slug,
                 name=product.name,
                 quantity=item.quantity,
@@ -89,6 +93,29 @@ def _read_cart(session: Session, cart: Cart) -> CartRead:
                 currency="INR",
                 line_total=line,
                 is_downloadable=product.is_downloadable,
+            )
+        )
+    for item in cart.items:
+        if item.deleted_at is not None or item.package_id is None:
+            continue
+        package = session.get(ServicePackage, item.package_id)
+        if package is None:
+            continue
+        line = _money(item.unit_price_snapshot * item.quantity)
+        subtotal += line
+        items.append(
+            CartItemRead(
+                id=item.id,
+                item_type=OrderItemType.PACKAGE,
+                product_id=None,
+                package_id=package.id,
+                slug=package.slug,
+                name=package.name,
+                quantity=item.quantity,
+                unit_price=item.unit_price_snapshot,
+                currency="INR",
+                line_total=line,
+                is_downloadable=False,
             )
         )
     return CartRead(id=cart.id, guest_token=cart.guest_token, currency=currency, subtotal=_money(subtotal), items=items)
@@ -100,29 +127,77 @@ def read_cart(session: Session, *, user_id: UUID | None, guest_token: str | None
     return _read_cart(session, cart)
 
 
-def add_item(session: Session, *, user_id: UUID | None, guest_token: str | None, product_id: UUID, quantity: int) -> CartRead:
-    product = _load_product(session, product_id)
-    price = _active_price(product)
-    assert price is not None
+def _load_package(session: Session, package_id: UUID) -> ServicePackage:
+    package = session.scalars(
+        select(ServicePackage)
+        .join(Service, Service.id == ServicePackage.service_id)
+        .where(
+            ServicePackage.id == package_id,
+            ServicePackage.deleted_at.is_(None),
+            Service.deleted_at.is_(None),
+            ServicePackage.is_published.is_(True),
+            Service.is_published.is_(True),
+        )
+    ).first()
+    if package is None or package.price_amount is None:
+        raise ApiError(422, "This service package is not available to buy")
+    return package
+
+
+def add_item(
+    session: Session,
+    *,
+    user_id: UUID | None,
+    guest_token: str | None,
+    product_id: UUID | None,
+    package_id: UUID | None,
+    quantity: int,
+) -> CartRead:
     cart = get_cart(session, user_id=user_id, guest_token=guest_token, create=True)
     assert cart is not None
-    existing = next(
-        (item for item in cart.items if item.deleted_at is None and item.product_id == product.id),
-        None,
-    )
-    if existing is None:
-        session.add(
-            CartItem(
-                cart_id=cart.id,
-                item_type=OrderItemType.PRODUCT,
-                product_id=product.id,
-                quantity=quantity,
-                unit_price_snapshot=_money(price.amount),
-            )
+    if product_id is not None:
+        product = _load_product(session, product_id)
+        price = _active_price(product)
+        assert price is not None
+        existing = next(
+            (item for item in cart.items if item.deleted_at is None and item.product_id == product.id),
+            None,
         )
+        if existing is None:
+            session.add(
+                CartItem(
+                    cart_id=cart.id,
+                    item_type=OrderItemType.PRODUCT,
+                    product_id=product.id,
+                    quantity=quantity,
+                    unit_price_snapshot=_money(price.amount),
+                )
+            )
+        else:
+            existing.quantity = min(99, existing.quantity + quantity)
+            existing.unit_price_snapshot = _money(price.amount)
+    elif package_id is not None:
+        package = _load_package(session, package_id)
+        assert package.price_amount is not None
+        existing = next(
+            (item for item in cart.items if item.deleted_at is None and item.package_id == package.id),
+            None,
+        )
+        if existing is None:
+            session.add(
+                CartItem(
+                    cart_id=cart.id,
+                    item_type=OrderItemType.PACKAGE,
+                    package_id=package.id,
+                    quantity=quantity,
+                    unit_price_snapshot=_money(package.price_amount),
+                )
+            )
+        else:
+            existing.quantity = min(99, existing.quantity + quantity)
+            existing.unit_price_snapshot = _money(package.price_amount)
     else:
-        existing.quantity = min(99, existing.quantity + quantity)
-        existing.unit_price_snapshot = _money(price.amount)
+        raise ApiError(422, "Choose a product or a service package")
     session.commit()
     session.refresh(cart)
     return _read_cart(session, cart)
@@ -161,10 +236,18 @@ def claim_cart(session: Session, *, user_id: UUID, guest_token: str | None) -> C
     if guest is None or guest.id == user_cart.id:
         return _read_cart(session, user_cart)
     for item in guest.items:
-        if item.deleted_at is not None or item.product_id is None:
+        if item.deleted_at is not None or (item.product_id is None and item.package_id is None):
             continue
         existing = next(
-            (row for row in user_cart.items if row.deleted_at is None and row.product_id == item.product_id),
+            (
+                row
+                for row in user_cart.items
+                if row.deleted_at is None
+                and (
+                    (item.product_id is not None and row.product_id == item.product_id)
+                    or (item.package_id is not None and row.package_id == item.package_id)
+                )
+            ),
             None,
         )
         if existing is None:
@@ -178,13 +261,23 @@ def claim_cart(session: Session, *, user_id: UUID, guest_token: str | None) -> C
     return _read_cart(session, user_cart)
 
 
-def checkout(session: Session, *, user_id: UUID) -> CheckoutRead:
+def _address_lines(label: str, line1: str, line2: str | None, city: str, state: str, postal: str, country: str) -> list[str]:
+    lines = [label, line1]
+    if line2:
+        lines.append(line2)
+    lines.append(f"{city}, {state} {postal}")
+    lines.append(country)
+    return lines
+
+
+def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> CheckoutRead:
     cart = get_cart(session, user_id=user_id, guest_token=None, create=False)
     if cart is None:
         raise ApiError(422, "The cart is empty")
-    lines = [item for item in cart.items if item.deleted_at is None and item.product_id is not None]
+    lines = [item for item in cart.items if item.deleted_at is None and (item.product_id is not None or item.package_id is not None)]
     if not lines:
         raise ApiError(422, "The cart is empty")
+    billing = details.shipping if details.billing_same_as_shipping or details.billing is None else details.billing
     subtotal = _money(sum((item.unit_price_snapshot * item.quantity for item in lines), Decimal("0")))
     order = Order(
         order_number=f"AX-{secrets.token_hex(4).upper()}",
@@ -193,24 +286,48 @@ def checkout(session: Session, *, user_id: UUID) -> CheckoutRead:
         currency="INR",
         subtotal=subtotal,
         total=subtotal,
+        customer_name=details.name.strip(),
+        customer_email=str(details.email).strip().lower(),
+        customer_phone=details.phone.strip(),
+        ship_line1=details.shipping.line1.strip(),
+        ship_line2=details.shipping.line2.strip() or None,
+        ship_city=details.shipping.city.strip(),
+        ship_state=details.shipping.state.strip(),
+        ship_postal_code=details.shipping.postal_code.strip(),
+        ship_country=details.shipping.country.strip(),
+        bill_line1=billing.line1.strip(),
+        bill_line2=billing.line2.strip() or None,
+        bill_city=billing.city.strip(),
+        bill_state=billing.state.strip(),
+        bill_postal_code=billing.postal_code.strip(),
+        bill_country=billing.country.strip(),
     )
     session.add(order)
     session.flush()
+    summary_lines: list[str] = []
     for item in lines:
-        product = session.get(Product, item.product_id)
-        name = product.name if product is not None else "Product"
+        if item.product_id is not None:
+            product = session.get(Product, item.product_id)
+            name = product.name if product is not None else "Product"
+            item_type = OrderItemType.PRODUCT
+        else:
+            package = session.get(ServicePackage, item.package_id)
+            name = package.name if package is not None else "Service"
+            item_type = OrderItemType.PACKAGE
         line_total = _money(item.unit_price_snapshot * item.quantity)
         session.add(
             OrderItem(
                 order_id=order.id,
-                item_type=OrderItemType.PRODUCT,
+                item_type=item_type,
                 product_id=item.product_id,
+                package_id=item.package_id,
                 name_snapshot=name,
                 unit_price=item.unit_price_snapshot,
                 quantity=item.quantity,
                 line_total=line_total,
             )
         )
+        summary_lines.append(f"{name} x {item.quantity} — INR {line_total}")
         item.deleted_at = _now()
     config = payments.public_config()
     payment = Payment(
@@ -234,6 +351,48 @@ def checkout(session: Session, *, user_id: UUID) -> CheckoutRead:
         )
     session.commit()
     session.refresh(order)
+    email_body = "\n".join(
+        [
+            f"Hello {order.customer_name},",
+            "",
+            f"Your Aurexion Digital order {order.order_number} is confirmed.",
+            f"Total: INR {order.total}",
+            f"Payment status: {payment.status.value}",
+            "",
+            "Items:",
+            *summary_lines,
+            "",
+            *_address_lines(
+                "Shipping",
+                order.ship_line1 or "",
+                order.ship_line2,
+                order.ship_city or "",
+                order.ship_state or "",
+                order.ship_postal_code or "",
+                order.ship_country or "",
+            ),
+            "",
+            *_address_lines(
+                "Billing",
+                order.bill_line1 or "",
+                order.bill_line2,
+                order.bill_city or "",
+                order.bill_state or "",
+                order.bill_postal_code or "",
+                order.bill_country or "",
+            ),
+            "",
+            "Aurexion Digital Private Limited",
+            "Flat No. S2, Plot 129, E6-A, Rera Colony, Nr Sai Board, Bagroda, Bhopal 462026, Madhya Pradesh",
+            "aurexiondigital@gmail.com",
+            "9153940559",
+        ]
+    )
+    email_sent = send_order_confirmation(
+        to=order.customer_email or "",
+        subject=f"Order {order.order_number} — Aurexion Digital",
+        body=email_body,
+    )
     return CheckoutRead(
         order_id=order.id,
         order_number=order.order_number,
@@ -241,6 +400,7 @@ def checkout(session: Session, *, user_id: UUID) -> CheckoutRead:
         currency=order.currency,
         total=order.total,
         placed_at=order.placed_at,
+        email_sent=email_sent,
         payment=PaymentSessionRead(
             enabled=config.enabled,
             provider=config.provider,

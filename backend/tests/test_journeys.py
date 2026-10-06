@@ -269,7 +269,20 @@ def test_customer_product_cart_checkout() -> None:
         assert listed.status_code == 200
         assert listed.json()["total"] == 1
 
-        anonymous_checkout = client.post("/api/checkout")
+        checkout_body = {
+            "name": "Aurexion Customer",
+            "email": customer_email,
+            "phone": "9153940559",
+            "shipping": {
+                "line1": "Flat No. S2, Plot 129",
+                "city": "Bhopal",
+                "state": "Madhya Pradesh",
+                "postal_code": "462026",
+                "country": "India",
+            },
+            "billing_same_as_shipping": True,
+        }
+        anonymous_checkout = client.post("/api/checkout", json=checkout_body)
         assert anonymous_checkout.status_code == 401
         added = client.post(
             "/api/cart/items",
@@ -280,7 +293,7 @@ def test_customer_product_cart_checkout() -> None:
         assert added.json()["items"][0]["name"] == f"Kit {marker}"
         assert Decimal(added.json()["subtotal"]) == Decimal("499.00")
 
-        checkout = client.post("/api/checkout", headers=_auth(customer_token))
+        checkout = client.post("/api/checkout", headers=_auth(customer_token), json=checkout_body)
         assert checkout.status_code == 200
         order = checkout.json()
         assert order["status"] == "pending"

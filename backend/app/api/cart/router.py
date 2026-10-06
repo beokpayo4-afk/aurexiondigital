@@ -31,7 +31,7 @@ def get_cart(
     return call_api(lambda: commerce.read_cart(session, user_id=user_id, guest_token=guest_token))
 
 
-@router.post("/items", response_model=CartRead, summary="Add a priced shop product to the cart")
+@router.post("/items", response_model=CartRead, summary="Add a priced product or service package to the cart")
 def add_item(
     data: CartItemCreate,
     session: Annotated[Session, Depends(get_db)],
@@ -44,6 +44,7 @@ def add_item(
             user_id=user_id,
             guest_token=guest_token,
             product_id=data.product_id,
+            package_id=data.package_id,
             quantity=data.quantity,
         )
     )

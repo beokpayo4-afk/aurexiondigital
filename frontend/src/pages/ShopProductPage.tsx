@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { PageIntro } from "@/components/layout/PageIntro";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -17,6 +17,7 @@ import { formatBilling, formatMoney } from "@/utils/format";
 
 export function ShopProductPage() {
   const { slug = "" } = useParams();
+  const navigate = useNavigate();
   const { add } = useCart();
   const product = useAsyncData(() => getProduct(slug), [slug]);
   const record = product.data;
@@ -103,9 +104,20 @@ export function ShopProductPage() {
             <p className="text-2xl font-semibold">{price ? formatMoney(price.amount, price.currency) : "Price on request"}</p>
             {price?.billing_period ? <p className="mt-2 text-sm text-ink/70">{formatBilling(price.billing_period)}</p> : null}
             {price ? (
-              <button type="button" className="mt-6 min-h-11 rounded-md bg-champagne px-5 text-sm font-semibold text-night" onClick={() => void add(record.id)}>
-                Add to cart
-              </button>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button type="button" className="min-h-11 rounded-md bg-champagne px-5 text-sm font-semibold text-night" onClick={() => void add(record.id)}>
+                  Add to cart
+                </button>
+                <button
+                  type="button"
+                  className="min-h-11 rounded-md bg-night px-5 text-sm font-semibold text-white"
+                  onClick={() => {
+                    void add(record.id, { open: false }).then(() => navigate("/checkout"));
+                  }}
+                >
+                  Buy now
+                </button>
+              </div>
             ) : (
               <p className="mt-6 text-sm text-ink/70">A product can be added to the cart after a price is published.</p>
             )}

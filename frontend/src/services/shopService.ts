@@ -6,7 +6,9 @@ const CART_TOKEN = "aurexion.cart";
 
 export type CartItem = {
   id: string;
-  product_id: string;
+  item_type?: string;
+  product_id: string | null;
+  package_id?: string | null;
   slug: string;
   name: string;
   quantity: number;
@@ -40,7 +42,26 @@ export type CheckoutResult = {
   currency: string;
   total: string;
   placed_at: string;
+  email_sent: boolean;
   payment: PaymentSession;
+};
+
+export type CheckoutAddress = {
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+};
+
+export type CheckoutDetails = {
+  name: string;
+  email: string;
+  phone: string;
+  shipping: CheckoutAddress;
+  billing: CheckoutAddress | null;
+  billing_same_as_shipping: boolean;
 };
 
 export type ShopCategory = {
@@ -85,6 +106,11 @@ export async function addCartItem(productId: string, quantity = 1): Promise<Cart
   return remember(response.data);
 }
 
+export async function addCartPackage(packageId: string, quantity = 1): Promise<Cart> {
+  const response = await api.post<Cart>("/cart/items", { package_id: packageId, quantity }, { headers: cartHeaders() });
+  return remember(response.data);
+}
+
 export async function updateCartItem(itemId: string, quantity: number): Promise<Cart> {
   const response = await api.patch<Cart>(`/cart/items/${itemId}`, { quantity }, { headers: cartHeaders() });
   return remember(response.data);
@@ -107,6 +133,15 @@ export type OrderDetail = {
   currency: string;
   total: string;
   placed_at: string;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  ship_line1?: string | null;
+  ship_city?: string | null;
+  ship_state?: string | null;
+  ship_postal_code?: string | null;
+  ship_country?: string | null;
+  items?: { id: string; name_snapshot: string; quantity: number; line_total: string }[];
 };
 
 export async function getOrder(orderId: string): Promise<OrderDetail> {
@@ -114,8 +149,8 @@ export async function getOrder(orderId: string): Promise<OrderDetail> {
   return response.data;
 }
 
-export async function checkout(): Promise<CheckoutResult> {
-  const response = await api.post<CheckoutResult>("/checkout");
+export async function checkout(details: CheckoutDetails): Promise<CheckoutResult> {
+  const response = await api.post<CheckoutResult>("/checkout", details);
   return response.data;
 }
 

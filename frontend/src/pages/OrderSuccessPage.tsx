@@ -37,6 +37,30 @@ export function OrderSuccessPage() {
           <p className="text-sm text-ink/75">
             {order.data.order_number} · {order.data.status} · {formatMoney(order.data.total, order.data.currency)}
           </p>
+          {params.get("emailed") === "1" ? (
+            <p className="mt-4 text-sm leading-6 text-ink/75">A confirmation email was sent to {order.data.customer_email}.</p>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-ink/75">
+              This page is your confirmation{order.data.customer_email ? ` for ${order.data.customer_email}` : ""}. Email delivery needs SMTP settings on the server.
+            </p>
+          )}
+          {order.data.ship_line1 ? (
+            <p className="mt-4 text-sm leading-6 text-ink/75">
+              Shipping: {order.data.ship_line1}, {order.data.ship_city}, {order.data.ship_state} {order.data.ship_postal_code}
+            </p>
+          ) : null}
+          {order.data.items && order.data.items.length > 0 ? (
+            <ul className="mt-6 space-y-2 text-sm">
+              {order.data.items.map((item) => (
+                <li key={item.id} className="flex justify-between gap-4 border-t border-line py-2">
+                  <span>
+                    {item.name_snapshot} × {item.quantity}
+                  </span>
+                  <span>{formatMoney(item.line_total, order.data?.currency ?? "INR")}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           {order.data.status === "pending" ? (
             <p className="mt-4 text-sm leading-6 text-ink/75">
               Payment is still pending. A digital download stays locked until the payment gateway confirms success.

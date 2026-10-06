@@ -9,6 +9,8 @@ type PackageCardProps = {
   billingPeriod?: string | null;
   pricePrefix?: string;
   features?: readonly string[];
+  onAdd?: () => void;
+  onBuy?: () => void;
 };
 
 export function PackageCard({
@@ -19,6 +21,8 @@ export function PackageCard({
   billingPeriod,
   pricePrefix,
   features = [],
+  onAdd,
+  onBuy,
 }: PackageCardProps) {
   const price = formatMoney(priceAmount, currency);
   const billing = formatBilling(billingPeriod);
@@ -43,6 +47,20 @@ export function PackageCard({
       ) : (
         <p className="mt-6 text-sm text-ink/60">Starting price is confirmed when you enquire.</p>
       )}
+      {price && (onAdd || onBuy) ? (
+        <div className="mt-4 flex flex-wrap gap-3">
+          {onAdd ? (
+            <button type="button" className="min-h-11 text-sm font-semibold text-ink" onClick={onAdd}>
+              Add to cart
+            </button>
+          ) : null}
+          {onBuy ? (
+            <button type="button" className="min-h-11 rounded-md bg-night px-4 text-sm font-semibold text-white" onClick={onBuy}>
+              Buy now
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </Card>
   );
 }

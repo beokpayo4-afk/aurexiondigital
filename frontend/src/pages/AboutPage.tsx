@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { ActivityList } from "@/components/company/ActivityList";
+import { ContactDetails } from "@/components/company/ContactDetails";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { CTASection } from "@/components/ui/CTASection";
 import { Container } from "@/components/ui/Container";
@@ -20,6 +21,12 @@ export function AboutPage() {
       />
       <section className="bg-paper">
         <Container className="py-16 sm:py-20 lg:py-24">
+          <div className="mb-14 max-w-xl rounded-xl border border-line bg-white p-6">
+            <h2 className="text-xl font-semibold">{SITE.name}</h2>
+            <div className="mt-4">
+              <ContactDetails />
+            </div>
+          </div>
           <h2 className="max-w-3xl text-3xl font-semibold leading-snug">The work is grouped into four areas.</h2>
           <p className="mt-5 max-w-2xl text-base leading-7 text-ink/75">
             Services, products, and courses are listed on their own pages. The lists below are the activities of the company.

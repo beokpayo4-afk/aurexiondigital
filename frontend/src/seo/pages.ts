@@ -49,6 +49,7 @@ const PRIVATE_PREFIXES = [
   "/account",
   "/orders",
   "/checkout",
+  "/payment",
   "/cart",
   "/learn",
   "/login",

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { CartItem } from "@/components/shop/CartItem";
+import { CheckoutSteps } from "@/components/shop/CheckoutSteps";
 import { OrderSummary } from "@/components/shop/OrderSummary";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { Button } from "@/components/ui/Button";
@@ -19,8 +20,9 @@ export function CartPage() {
     <>
       <PageIntro eyebrow="Shop" title="Cart" description="Change quantities before checkout. Checkout requires an account." />
       <section className="bg-paper">
-        <Container className="grid gap-10 py-16 lg:grid-cols-[1.2fr_0.8fr]">
-          <div>
+        <Container className="grid gap-10 py-12 sm:py-16 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-6">
+            <CheckoutSteps current="Cart" />
             {empty ? <p className="text-sm text-ink/75">The cart is empty.</p> : null}
             {cart?.items.map((item) => (
               <CartItem key={item.id} item={item} onQuantity={(quantity) => void update(item.id, quantity)} onRemove={() => void remove(item.id)} />

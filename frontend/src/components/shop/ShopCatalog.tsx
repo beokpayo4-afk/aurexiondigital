@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { ProductFilter } from "@/components/shop/ProductFilter";
 import { ProductGrid } from "@/components/shop/ProductGrid";
@@ -15,6 +16,7 @@ type ShopCatalogProps = {
 
 export function ShopCatalog({ categorySlug }: ShopCatalogProps) {
   const { add } = useCart();
+  const navigate = useNavigate();
   const categories = useAsyncData(() => listShopCategories(), []);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("sort_order");
@@ -63,7 +65,15 @@ export function ShopCatalog({ categorySlug }: ShopCatalogProps) {
       {categoryReady && !products.loading && !products.error && products.data?.items.length === 0 ? (
         <EmptyState title="No products match" description="Try a different search or category." />
       ) : null}
-      {products.data && products.data.items.length > 0 ? <ProductGrid products={products.data.items} onAdd={(product) => void add(product.id)} /> : null}
+      {products.data && products.data.items.length > 0 ? (
+        <ProductGrid
+          products={products.data.items}
+          onAdd={(product) => void add(product.id)}
+          onBuy={(product) => {
+            void add(product.id, { open: false }).then(() => navigate("/checkout"));
+          }}
+        />
+      ) : null}
     </div>
   );
 }

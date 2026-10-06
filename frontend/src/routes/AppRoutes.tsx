@@ -30,6 +30,8 @@ import {
   NotFoundPage,
   OrderSuccessPage,
   OrdersPage,
+  PaymentPage,
+  PolicyPage,
   ProductDetailPage,
   RegisterPage,
   ShopCategoryPage,
@@ -67,6 +69,10 @@ export function AppRoutes() {
         <Route path="academy/register" element={<AcademyRegisterPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="privacy" element={<PolicyPage kind="privacy" />} />
+        <Route path="terms" element={<PolicyPage kind="terms" />} />
+        <Route path="refunds" element={<PolicyPage kind="refund" />} />
+        <Route path="data-security" element={<PolicyPage kind="security" />} />
         <Route path="custom-quote" element={<CustomQuotePage />} />
         <Route path="quote" element={<QuoteRedirect />} />
         <Route path="login" element={<LoginPage />} />
@@ -83,6 +89,7 @@ export function AppRoutes() {
         <Route path="account" element={<AccountPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="payment" element={<PaymentPage />} />
         <Route path="order-success" element={<OrderSuccessPage />} />
         <Route path="learn" element={<LearnPage />} />
       </Route>
