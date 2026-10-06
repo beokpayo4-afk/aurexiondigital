@@ -29,6 +29,7 @@ PRODUCTS = [
         "description": "A downloadable kit for businesses that need a consistent feed without starting from a blank page. It includes post layouts, caption starters, and a simple monthly calendar.",
         "amount": "2499.00",
         "sku": "AX-SOC-001",
+        "image": "/products/social-media-content-kit.webp",
     },
     {
         "slug": "meta-ads-campaign-pack",
@@ -38,6 +39,7 @@ PRODUCTS = [
         "description": "Use this pack to brief a first paid social campaign. It covers campaign objectives, audience worksheets, and short ad variations you can adapt.",
         "amount": "3499.00",
         "sku": "AX-ADS-002",
+        "image": "/products/meta-ads-campaign-pack.png",
     },
     {
         "slug": "brand-identity-starter",
@@ -47,6 +49,7 @@ PRODUCTS = [
         "description": "For a new business that needs a clear look before a website or campaign. The starter records your colours, type choices, and how the name should appear.",
         "amount": "4999.00",
         "sku": "AX-BRD-003",
+        "image": "/products/brand-identity-starter.jpg",
     },
     {
         "slug": "website-launch-checklist",
@@ -56,6 +59,7 @@ PRODUCTS = [
         "description": "Walk through content, contact forms, mobile layout, and basic search setup before a site goes live. Written for owners, not only developers.",
         "amount": "1499.00",
         "sku": "AX-WEB-004",
+        "image": "/products/website-launch-checklist.jpg",
     },
     {
         "slug": "lead-magnet-templates",
@@ -65,6 +69,7 @@ PRODUCTS = [
         "description": "Templates for a checklist, a short guide, a worksheet, a webinar invite, and a consultation offer. Each one includes a headline and a call to action.",
         "amount": "1999.00",
         "sku": "AX-LED-005",
+        "image": "/products/lead-magnet-templates.jpg",
     },
     {
         "slug": "business-proposal-kit",
@@ -74,6 +79,7 @@ PRODUCTS = [
         "description": "Send a clear proposal instead of a long chat thread. The kit covers the problem, the work, the fee, and the next step.",
         "amount": "2999.00",
         "sku": "AX-PRP-006",
+        "image": "/products/business-proposal-kit.jpg",
     },
     {
         "slug": "seo-starter-toolkit",
@@ -83,6 +89,7 @@ PRODUCTS = [
         "description": "A first pass at search visibility for a local or small business site. It does not replace an ongoing campaign. It gives you the pages and titles to fix first.",
         "amount": "2499.00",
         "sku": "AX-SEO-007",
+        "image": "/products/seo-starter-toolkit.jpg",
     },
     {
         "slug": "email-sequence-pack",
@@ -92,6 +99,7 @@ PRODUCTS = [
         "description": "Six emails you can adapt: a welcome, two useful notes, an offer, a reminder, and a last follow-up. Written in plain language for service businesses.",
         "amount": "1799.00",
         "sku": "AX-EML-008",
+        "image": "/products/email-sequence-pack.png",
     },
 ]
 
@@ -107,6 +115,26 @@ def main() -> None:
                 select(Product).where(Product.slug == item["slug"], Product.deleted_at.is_(None))
             ).first()
             if existing is not None:
+                image = session.scalars(
+                    select(ProductImage).where(
+                        ProductImage.product_id == existing.id,
+                        ProductImage.deleted_at.is_(None),
+                        ProductImage.is_primary.is_(True),
+                    )
+                ).first()
+                if image is None:
+                    session.add(
+                        ProductImage(
+                            product_id=existing.id,
+                            file_url=item["image"],
+                            alt_text=item["name"],
+                            sort_order=0,
+                            is_primary=True,
+                        )
+                    )
+                elif image.file_url != item["image"]:
+                    image.file_url = item["image"]
+                    image.alt_text = item["name"]
                 continue
             category = categories.get(item["category"])
             product = Product(
@@ -137,7 +165,7 @@ def main() -> None:
             session.add(
                 ProductImage(
                     product_id=product.id,
-                    file_url=f"/products/{item['slug']}.svg",
+                    file_url=item["image"],
                     alt_text=item["name"],
                     sort_order=0,
                     is_primary=True,
