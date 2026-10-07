@@ -10,8 +10,14 @@ const areaIds = AREAS.map((area) => area.id) as [string, ...string[]];
 export const contactSchema = z.object({
   name: z.string().trim().min(1, "Enter your full name.").max(200),
   company_name: z.string().trim().min(1, "Enter the company name.").max(200),
-  phone: z.string().trim().min(1, "Enter a phone number.").max(32),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Enter a phone number.")
+    .max(32)
+    .refine((value) => value.replace(/\D/g, "").length >= 10, "Enter a valid phone number."),
   email: z.string().trim().email("Enter a valid email."),
+  subject: z.string().trim().min(1, "Enter a subject.").max(200),
   promote: z.string().trim().min(1, "Describe what you want to promote or build."),
   interest: z.enum(CONTACT_INTERESTS, { errorMap: () => ({ message: "Choose Marketing, Technology, Education, or Other." }) }),
   channel: z.enum(CONTACT_CHANNELS, { errorMap: () => ({ message: "Choose Online, Offline, or Both." }) }),
@@ -102,6 +108,7 @@ export async function submitContact(values: ContactValues): Promise<void> {
     channel: values.channel,
     budget: values.budget,
     target_location: values.target_location,
+    subject: values.subject,
     message: values.message,
     source_path: "/contact",
   });

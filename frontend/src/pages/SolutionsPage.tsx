@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { SOLUTIONS } from "@/constants/solutions";
+import { SERVICE_SCOPE, SOLUTIONS } from "@/constants/solutions";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { listServices } from "@/services/catalogService";
@@ -44,6 +44,27 @@ export function SolutionsPage() {
                 </Reveal>
               );
             })}
+          </div>
+          <div className="mt-16">
+            <h2 className="text-3xl font-semibold">Services</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/75">
+              These are the services the company can discuss. A package with a price is a starting price. Final pricing may vary based on campaign requirements, duration, location, media/platform costs, production requirements, third-party charges and other project requirements.
+            </p>
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
+              {SERVICE_SCOPE.map((group) => (
+                <Card key={group.title}>
+                  <h3 className="text-xl font-semibold">{group.title}</h3>
+                  <ul className="mt-4 space-y-2 text-sm leading-6 text-ink/80">
+                    {group.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                  <Link to={group.to} className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-champagne-deep">
+                    View service
+                  </Link>
+                </Card>
+              ))}
+            </div>
           </div>
         </Container>
       </section>

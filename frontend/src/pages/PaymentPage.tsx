@@ -5,6 +5,7 @@ import { readCheckoutDraft } from "@/components/shop/CheckoutForm";
 import { CheckoutSteps } from "@/components/shop/CheckoutSteps";
 import { OrderSummary } from "@/components/shop/OrderSummary";
 import { PageIntro } from "@/components/layout/PageIntro";
+import { PolicyAcceptance } from "@/components/legal/PolicyAcceptance";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { useCart } from "@/context/useCart";
@@ -18,11 +19,12 @@ export function PaymentPage() {
   const { cart, refresh } = useCart();
   const draft = readCheckoutDraft();
   const [error, setError] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const empty = !cart || cart.items.length === 0;
 
   const pay = async () => {
-    if (!draft || empty) {
+    if (!draft || empty || !accepted) {
       return;
     }
     setError(null);
@@ -33,7 +35,11 @@ export function PaymentPage() {
       await refresh();
       navigate(`/order-success?order=${result.order_id}&emailed=${result.email_sent ? "1" : "0"}`);
     } catch (reason) {
-      setError(apiErrorMessage(reason, "The payment could not be started."));
+      const message = apiErrorMessage(reason, "The payment could not be started.");
+      setError(message);
+      if (message === "The cart is empty") {
+        await refresh();
+      }
       setSubmitting(false);
     }
   };
@@ -51,21 +57,24 @@ export function PaymentPage() {
               </p>
             ) : (
               <div className="rounded-xl border border-line bg-white p-6">
-                <p className="text-sm font-semibold">{draft.name}</p>
-                <p className="mt-1 text-sm text-ink/70">{draft.email}</p>
+                <h2 className="text-sm font-semibold">Customer</h2>
+                <p className="mt-2 text-sm text-ink/80">{draft.name}</p>
+                <p className="text-sm text-ink/70">{draft.email}</p>
                 <p className="text-sm text-ink/70">{draft.phone}</p>
-                <p className="mt-4 text-sm leading-6 text-ink/80">
+                <h2 className="mt-6 text-sm font-semibold">Billing</h2>
+                <p className="mt-2 text-sm leading-6 text-ink/80">
                   {draft.shipping.line1}, {draft.shipping.city}, {draft.shipping.state} {draft.shipping.postal_code}
                 </p>
                 <p className="mt-6 text-sm leading-6 text-ink/75">
                   {cart?.items.some((item) => !item.is_downloadable) ? "This order includes a service or a physical delivery." : "Digital items are delivered by email after payment is recorded."} Payment stays pending until it is confirmed.
                 </p>
+                <PolicyAcceptance id="payment-policy-acceptance" checked={accepted} onChange={setAccepted} />
                 {error ? (
                   <p role="alert" className="mt-4 text-sm text-red-800">
                     {error}
                   </p>
                 ) : null}
-                <Button type="button" className="mt-6" tone="light" disabled={empty || submitting} onClick={() => void pay()}>
+                <Button type="button" className="mt-6" tone="light" disabled={empty || submitting || !accepted} onClick={() => void pay()}>
                   {submitting ? "Confirming payment" : "Pay now"}
                 </Button>
               </div>

@@ -64,6 +64,7 @@ export type Product = {
   summary: string | null;
   description?: string | null;
   product_type: string;
+  is_downloadable?: boolean;
   listing_channel: string;
   demo_url?: string | null;
   features?: ProductFeature[];

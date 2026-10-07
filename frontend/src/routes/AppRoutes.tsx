@@ -72,6 +72,9 @@ export function AppRoutes() {
         <Route path="privacy" element={<PolicyPage kind="privacy" />} />
         <Route path="terms" element={<PolicyPage kind="terms" />} />
         <Route path="refunds" element={<PolicyPage kind="refund" />} />
+        <Route path="shipping" element={<PolicyPage kind="shipping" />} />
+        <Route path="disclaimer" element={<PolicyPage kind="disclaimer" />} />
+        <Route path="company" element={<PolicyPage kind="company" />} />
         <Route path="data-security" element={<PolicyPage kind="security" />} />
         <Route path="custom-quote" element={<CustomQuotePage />} />
         <Route path="quote" element={<QuoteRedirect />} />

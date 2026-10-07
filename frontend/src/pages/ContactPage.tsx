@@ -9,12 +9,13 @@ import { Container } from "@/components/ui/Container";
 import { FormInput } from "@/components/ui/FormInput";
 import { Textarea } from "@/components/ui/Textarea";
 import { CONTACT_CHANNELS, CONTACT_INTERESTS } from "@/constants/enquiry";
+import { SITE } from "@/constants/site";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { contactSchema, submitContact, type ContactValues } from "@/services/leadService";
 import { apiErrorMessage } from "@/utils/apiError";
 
 export function ContactPage() {
-  usePageTitle("Contact", "Send a message to Aurexion Digital.");
+  usePageTitle("Contact Us", `Phone ${SITE.phone}, email ${SITE.email}, ${SITE.address}.`);
   const [sent, setSent] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -37,7 +38,7 @@ export function ContactPage() {
     <>
       <PageIntro
         eyebrow="Contact"
-        title="Contact"
+        title="Contact Us"
         description="Tell us what you want to promote or build. For a priced campaign, use Custom Quote."
       />
       <section className="bg-paper">
@@ -63,6 +64,7 @@ export function ContactPage() {
                 <FormInput label="Phone Number" type="tel" autoComplete="tel" {...register("phone")} error={errors.phone?.message} />
                 <FormInput label="Email" type="email" autoComplete="email" {...register("email")} error={errors.email?.message} />
               </div>
+              <FormInput label="Subject" {...register("subject")} error={errors.subject?.message} />
               <Textarea label="What do you want to promote/build?" {...register("promote")} error={errors.promote?.message} />
               <fieldset>
                 <legend className="text-sm font-medium text-ink">Marketing / Technology / Education / Other</legend>

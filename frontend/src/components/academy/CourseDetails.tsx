@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { CourseCurriculum } from "@/components/academy/CourseCurriculum";
+import { PolicyAcceptance } from "@/components/legal/PolicyAcceptance";
 import { ContentImage } from "@/components/ui/ContentImage";
 import { useAuth } from "@/hooks/useAuth";
 import { buyCourse, type CourseOutline } from "@/services/academyService";
@@ -16,6 +17,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const price = formatMoney(course.price_amount, course.currency);
   const enrolled = course.enrollment_status === "active" || course.enrollment_status === "completed";
@@ -23,6 +25,9 @@ export function CourseDetails({ course }: CourseDetailsProps) {
   const onBuy = async () => {
     if (!isAuthenticated) {
       navigate("/academy/login", { state: { from: `/academy/course/${course.slug}` } });
+      return;
+    }
+    if (!accepted) {
       return;
     }
     setError(null);
@@ -84,14 +89,28 @@ export function CourseDetails({ course }: CourseDetailsProps) {
             Continue learning
           </button>
         ) : (
-          <button type="button" className="mt-6 min-h-11 rounded-md bg-champagne px-5 text-sm font-semibold text-night" disabled={!price || submitting} onClick={() => void onBuy()}>
-            {submitting ? "Placing order" : "Buy Now"}
-          </button>
+          <>
+            <PolicyAcceptance id="course-policy-acceptance" checked={accepted} onChange={setAccepted} />
+            <button type="button" className="mt-6 min-h-11 rounded-md bg-champagne px-5 text-sm font-semibold text-night" disabled={!price || submitting || !accepted} onClick={() => void onBuy()}>
+              {submitting ? "Placing order" : "Buy Now"}
+            </button>
+          </>
         )}
         {course.enrollment_status === "pending" ? (
           <p className="mt-4 text-sm text-ink/70">Payment is pending. Course access opens after payment succeeds.</p>
         ) : null}
-        <p className="mt-4 text-sm leading-6 text-ink/60">Lesson material and downloads stay on the server until an enrollment is active.</p>
+        <p className="mt-4 text-sm leading-6 text-ink/60">
+          After payment is confirmed, course access opens in your account. Lesson files stay on the server until the enrollment is active.
+        </p>
+        <p className="mt-3 text-sm leading-6 text-ink/70">
+          <Link className="font-semibold text-champagne-deep" to="/refunds">
+            Refund & Cancellation Policy
+          </Link>
+          {" · "}
+          <Link className="font-semibold text-champagne-deep" to="/shipping">
+            Shipping & Delivery Policy
+          </Link>
+        </p>
         {error ? (
           <p role="alert" className="mt-4 text-sm text-red-800">
             {error}

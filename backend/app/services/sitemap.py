@@ -34,6 +34,13 @@ STATIC_PATHS = (
     "/academy/courses",
     "/about",
     "/contact",
+    "/company",
+    "/privacy",
+    "/terms",
+    "/refunds",
+    "/shipping",
+    "/disclaimer",
+    "/data-security",
     "/custom-quote",
 )
 
@@ -44,6 +51,7 @@ Disallow: /admin
 Disallow: /account
 Disallow: /orders
 Disallow: /checkout
+Disallow: /payment
 Disallow: /cart
 Disallow: /learn
 Disallow: /login

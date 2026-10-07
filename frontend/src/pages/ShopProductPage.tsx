@@ -128,7 +128,22 @@ export function ShopProductPage() {
             ) : (
               <p className="mt-6 text-sm text-ink/70">A product can be added to the cart after a price is published.</p>
             )}
-            <p className="mt-6 text-sm leading-6 text-ink/60">Download files are not shown here. Access is released on the order after payment succeeds.</p>
+            <div className="mt-6 space-y-3 text-sm leading-6 text-ink/70">
+              {record.is_downloadable ? (
+                <p>This is a digital product. After payment is confirmed, access is provided by download, email, or your account. Files are not shown on this page before payment.</p>
+              ) : (
+                <p>If this item is shipped, checkout collects a delivery address. A delivery time is shown only when one has been set for the product.</p>
+              )}
+              <p>
+                <Link className="font-semibold text-champagne-deep" to="/refunds">
+                  Refund & Cancellation Policy
+                </Link>
+                {" · "}
+                <Link className="font-semibold text-champagne-deep" to="/shipping">
+                  Shipping & Delivery Policy
+                </Link>
+              </p>
+            </div>
             <Link to="/shop" className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-champagne-deep">
               Back to shop
             </Link>

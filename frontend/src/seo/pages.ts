@@ -32,11 +32,39 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   },
   "/about": {
     title: "About Us",
-    description: `${SITE.name}. ${SITE.positioning}. The registered office is in the State of Madhya Pradesh.`,
+    description: `${SITE.name} works in technology, digital marketing, advertising, education, and business solutions.`,
   },
   "/contact": {
-    title: "Contact",
-    description: "Send a message to Aurexion Digital.",
+    title: "Contact Us",
+    description: `Phone ${SITE.phone}, email ${SITE.email}, ${SITE.address}.`,
+  },
+  "/company": {
+    title: "Company Information",
+    description: `${SITE.name}. ${SITE.phone}. ${SITE.email}. ${SITE.address}.`,
+  },
+  "/privacy": {
+    title: "Privacy Policy",
+    description: "How Aurexion Digital Private Limited collects and uses contact, account, order, and website information.",
+  },
+  "/terms": {
+    title: "Terms & Conditions",
+    description: "Terms for using the website, requesting services, and buying products or courses.",
+  },
+  "/refunds": {
+    title: "Refund & Cancellation Policy",
+    description: "Refund and cancellation terms for digital products, services, and courses.",
+  },
+  "/shipping": {
+    title: "Shipping & Delivery Policy",
+    description: "How digital products, physical products, and services are delivered.",
+  },
+  "/disclaimer": {
+    title: "Disclaimer",
+    description: "Limits on website information, marketing results, advertising availability, and prices.",
+  },
+  "/data-security": {
+    title: "Data Security",
+    description: "How accounts, orders, and payment secrets are handled.",
   },
   "/custom-quote": {
     title: "Custom Quote",

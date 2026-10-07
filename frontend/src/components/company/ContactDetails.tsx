@@ -30,7 +30,13 @@ export function ContactDetails({ tone = "light" }: ContactDetailsProps) {
         </div>
         <div>
           <dt className={`text-xs font-semibold uppercase tracking-[0.18em] ${label}`}>Address</dt>
-          <dd className="mt-1 max-w-xs">{SITE.address}</dd>
+          <dd className="mt-1 max-w-xs">
+            {SITE.addressLines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </dd>
         </div>
       </dl>
     </address>

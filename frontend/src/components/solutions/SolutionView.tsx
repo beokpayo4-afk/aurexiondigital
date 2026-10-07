@@ -130,7 +130,7 @@ export function SolutionView({ service }: SolutionViewProps) {
                     priceAmount={item.price_amount}
                     currency={item.currency}
                     billingPeriod={item.billing_period}
-                    pricePrefix="Starting at"
+                    pricePrefix="Starting from"
                     features={(item.features ?? []).map((feature) => feature.label)}
                     onAdd={item.price_amount ? () => void addPackage(item.id) : undefined}
                     onBuy={
@@ -151,6 +151,18 @@ export function SolutionView({ service }: SolutionViewProps) {
             <p className="mt-8 max-w-3xl text-sm leading-6 text-ink/75">{content.managementFeeNote}</p>
           ) : null}
           <p className="mt-6 max-w-3xl border-t border-line pt-6 text-sm leading-6 text-ink/75">{PRICING_DISCLAIMER}</p>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-ink/75">
+            Final pricing may vary based on campaign requirements, duration, location, media/platform costs, production requirements, third-party charges and other project requirements.
+          </p>
+          <ol className="mt-6 max-w-3xl list-decimal space-y-2 pl-5 text-sm leading-6 text-ink/80">
+            <li>Package or service</li>
+            <li>Enquire now</li>
+            <li>Consultation</li>
+            <li>Requirement analysis</li>
+            <li>Final proposal</li>
+            <li>Payment</li>
+            <li>Service execution</li>
+          </ol>
         </Container>
       </section>
 

@@ -14,7 +14,7 @@ export function organizationData(origin: string): JsonObject {
     logo: `${origin}/favicon.jpg`,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Flat No. S2, Plot 129, E6-A, Rera Colony, Nr Sai Board, Bagroda",
+      streetAddress: "Flat No. S2-Plot 129 E6-A, RERA Colony, Near Sai Board, Bagroda",
       addressLocality: "Bhopal",
       postalCode: "462026",
       addressRegion: "Madhya Pradesh",

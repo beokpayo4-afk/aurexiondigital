@@ -27,7 +27,57 @@ export function AboutPage() {
               <ContactDetails />
             </div>
           </div>
-          <h2 className="max-w-3xl text-3xl font-semibold leading-snug">The work is grouped into four areas.</h2>
+          <div className="max-w-3xl space-y-10">
+            <section>
+              <h2 className="text-2xl font-semibold">Who We Are</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Aurexion Digital Private Limited works with individuals, startups, businesses, and organizations. The company is based in Bhopal, Madhya Pradesh.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">What We Do</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                The company provides digital services, technology solutions, digital products, educational offerings, and business support. Work is scoped with the client before it starts.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Our Solutions</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Solutions cover technology, digital marketing, advertising, education, and business support. Each service has its own page with the scope and, where a package exists, a starting price.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Technology & Digital Products</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Technology work includes software, SaaS products, business automation, websites, applications, digital products, and related technology solutions. Published products and prices are listed in Technology and Shop.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Marketing & Advertising</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Marketing and advertising cover digital campaigns, online and offline advertising, influencer and creator work, creative production, and lead generation. Results depend on the brief, the budget, and the platforms used.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Education & Training</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Education is offered through Aurexion Academy. A course page shows the price, duration, level, modules, and what is included when those details have been published. A certificate is mentioned only when that course has one enabled.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Business Solutions</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                Business support includes consulting, trade and vendor support, and outsourcing for process, marketing, technology, and operations. The scope is confirmed in a proposal.
+              </p>
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold">Our Approach</h2>
+              <p className="mt-3 text-sm leading-7 text-ink/80">
+                A service starts with an enquiry, then a consultation, a review of the requirement, a final proposal, payment, and then the work. A package label is not a finished quote.
+              </p>
+            </section>
+          </div>
+          <h2 className="mt-16 max-w-3xl text-3xl font-semibold leading-snug">The work is grouped into four areas.</h2>
           <p className="mt-5 max-w-2xl text-base leading-7 text-ink/75">
             Services, products, and courses are listed on their own pages. The lists below are the activities of the company.
           </p>

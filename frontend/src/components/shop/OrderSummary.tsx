@@ -31,6 +31,7 @@ export function OrderSummary({ cart, orderNumber, total, currency = "INR", statu
         </ul>
       ) : null}
       <p className="mt-6 text-sm font-semibold text-ink">Total {formatMoney(amount, code)}</p>
+      {cart ? <p className="mt-2 text-sm leading-6 text-ink/70">No separate tax is added on this page.</p> : null}
     </div>
   );
 }
