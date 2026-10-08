@@ -277,6 +277,8 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
     lines = [item for item in cart.items if item.deleted_at is None and (item.product_id is not None or item.package_id is not None)]
     if not lines:
         raise ApiError(422, "The cart is empty")
+    if not payments.public_config().enabled:
+        raise ApiError(503, "Payment could not be started because no payment gateway is connected.")
     billing = details.shipping if details.billing_same_as_shipping or details.billing is None else details.billing
     subtotal = _money(sum((item.unit_price_snapshot * item.quantity for item in lines), Decimal("0")))
     order = Order(

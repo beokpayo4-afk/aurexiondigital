@@ -243,7 +243,7 @@ def test_customer_product_cart_checkout() -> None:
     try:
         staff_email, staff_token, staff_id = _staff()
         customer_email, customer_token, customer_id = _register("shopper")
-        other_email, other_token, other_id = _register("other-shopper")
+        other_email, _other_token, other_id = _register("other-shopper")
         emails.extend([staff_email, customer_email, other_email])
         user_ids.extend([staff_id, customer_id, other_id])
 
@@ -294,17 +294,14 @@ def test_customer_product_cart_checkout() -> None:
         assert Decimal(added.json()["subtotal"]) == Decimal("499.00")
 
         checkout = client.post("/api/checkout", headers=_auth(customer_token), json=checkout_body)
-        assert checkout.status_code == 200
-        order = checkout.json()
-        assert order["status"] == "pending"
+        assert checkout.status_code == 503
+        assert checkout.json()["detail"] == "Payment could not be started because no payment gateway is connected."
         assert "secret" not in checkout.text.lower()
-        own = client.get("/api/orders", headers=_auth(customer_token), params={"q": order["order_number"]})
+        own = client.get("/api/orders", headers=_auth(customer_token))
         assert own.status_code == 200
-        assert own.json()["total"] == 1
-        hidden = client.get(f"/api/orders/{order['order_id']}", headers=_auth(other_token))
-        assert hidden.status_code == 404
-        emptied = client.get("/api/cart", headers=_auth(customer_token))
-        assert emptied.json()["items"] == []
+        assert own.json()["total"] == 0
+        kept = client.get("/api/cart", headers=_auth(customer_token))
+        assert kept.json()["items"][0]["name"] == f"Kit {marker}"
     finally:
         _cleanup(emails=emails, service_ids=[], product_ids=product_ids, course_ids=[], user_ids=user_ids)
 

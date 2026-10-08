@@ -31,6 +31,11 @@ export function PaymentPage() {
     setSubmitting(true);
     try {
       const result = await checkout(draft);
+      if (!result.payment.enabled) {
+        setError("Payment could not be started because no payment gateway is connected.");
+        setSubmitting(false);
+        return;
+      }
       sessionStorage.removeItem("aurexion.checkout");
       await refresh();
       navigate(`/order-success?order=${result.order_id}&emailed=${result.email_sent ? "1" : "0"}`);
