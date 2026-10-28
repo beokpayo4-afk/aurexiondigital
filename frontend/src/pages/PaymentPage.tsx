@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { readCheckoutDraft } from "@/components/shop/CheckoutForm";
 import { CheckoutSteps } from "@/components/shop/CheckoutSteps";
+import { ManualPayment } from "@/components/shop/ManualPayment";
 import { OrderSummary } from "@/components/shop/OrderSummary";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { PolicyAcceptance } from "@/components/legal/PolicyAcceptance";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { useCart } from "@/context/useCart";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { checkout } from "@/services/shopService";
+import { checkout, type CheckoutResult } from "@/services/shopService";
 import { apiErrorMessage } from "@/utils/apiError";
 
 export function PaymentPage() {
@@ -21,6 +22,7 @@ export function PaymentPage() {
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [placed, setPlaced] = useState<CheckoutResult | null>(null);
   const empty = !cart || cart.items.length === 0;
 
   const pay = async () => {
@@ -31,14 +33,21 @@ export function PaymentPage() {
     setSubmitting(true);
     try {
       const result = await checkout(draft);
-      if (!result.payment.enabled) {
+      if (result.payment.enabled) {
+        sessionStorage.removeItem("aurexion.checkout");
+        await refresh();
+        navigate(`/order-success?order=${result.order_id}&emailed=${result.email_sent ? "1" : "0"}`);
+        return;
+      }
+      if (!result.payment.payment_link && !result.payment.upi_id) {
         setError("Payment could not be started because no payment gateway is connected.");
         setSubmitting(false);
         return;
       }
       sessionStorage.removeItem("aurexion.checkout");
+      setPlaced(result);
+      setSubmitting(false);
       await refresh();
-      navigate(`/order-success?order=${result.order_id}&emailed=${result.email_sent ? "1" : "0"}`);
     } catch (reason) {
       const message = apiErrorMessage(reason, "The payment could not be started.");
       setError(message);
@@ -56,7 +65,20 @@ export function PaymentPage() {
         <Container className="grid gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_0.8fr]">
           <div className="space-y-6">
             <CheckoutSteps current="Payment" />
-            {!draft ? (
+            {placed ? (
+              <>
+                <ManualPayment
+                  orderNumber={placed.order_number}
+                  amount={placed.total}
+                  currency={placed.currency}
+                  paymentLink={placed.payment.payment_link}
+                  upiId={placed.payment.upi_id}
+                />
+                <Link to={`/order-success?order=${placed.order_id}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-champagne-deep">
+                  View order {placed.order_number}
+                </Link>
+              </>
+            ) : !draft ? (
               <p className="text-sm leading-6 text-ink/75">
                 Add your contact and address details first. <Link to="/checkout" className="font-semibold text-champagne-deep">Return to checkout</Link>
               </p>
@@ -85,7 +107,11 @@ export function PaymentPage() {
               </div>
             )}
           </div>
-          <OrderSummary cart={cart} />
+          {placed ? (
+            <OrderSummary orderNumber={placed.order_number} total={placed.total} currency={placed.currency} status={placed.status} />
+          ) : (
+            <OrderSummary cart={cart} />
+          )}
         </Container>
       </section>
     </>

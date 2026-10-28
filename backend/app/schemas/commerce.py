@@ -72,6 +72,8 @@ class PaymentSessionRead(BaseModel):
     currency: str
     status: PaymentStatus
     reference: str | None
+    payment_link: str | None = None
+    upi_id: str | None = None
 
 
 class CheckoutRead(BaseModel):

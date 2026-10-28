@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     payment_key_secret: str = Field(default="", validation_alias=AliasChoices("PAYMENT_KEY_SECRET"))
     payment_webhook_secret: str = Field(default="", validation_alias=AliasChoices("PAYMENT_WEBHOOK_SECRET"))
     payment_currency: str = Field(default="INR", validation_alias=AliasChoices("PAYMENT_CURRENCY"))
+    payment_link_url: str = Field(
+        default="https://razorpay.me/@aurexiondigitalprivatelimited",
+        validation_alias=AliasChoices("PAYMENT_LINK_URL"),
+    )
+    payment_upi_id: str = Field(default="aurexiondigital212553.rzp@rxairtel", validation_alias=AliasChoices("PAYMENT_UPI_ID"))
     download_storage_dir: str = Field(default="", validation_alias=AliasChoices("DOWNLOAD_STORAGE_DIR"))
     public_site_url: str = Field(default="", validation_alias=AliasChoices("PUBLIC_SITE_URL"))
     smtp_host: str = Field(default="", validation_alias=AliasChoices("SMTP_HOST"))

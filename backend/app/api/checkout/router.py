@@ -24,6 +24,8 @@ def payment_config() -> PaymentSessionRead:
         currency=config.currency,
         status="pending",
         reference=None,
+        payment_link=config.payment_link,
+        upi_id=config.upi_id,
     )
 
 

@@ -86,6 +86,8 @@ Root `.env` is read by Docker Compose.
 | `PAYMENT_KEY_SECRET` | Payment secret. Never return it from the API |
 | `PAYMENT_WEBHOOK_SECRET` | Webhook signing secret |
 | `PAYMENT_CURRENCY` | Currency code. Default `INR` |
+| `PAYMENT_LINK_URL` | Razorpay payment page shown after Pay now |
+| `PAYMENT_UPI_ID` | UPI ID shown after Pay now |
 | `DOWNLOAD_STORAGE_DIR` | Private directory for paid downloads |
 
 `frontend/.env.example` only sets `VITE_API_BASE_URL`. `backend/.env.example` lists the API settings.

@@ -16,6 +16,12 @@ class PaymentPublicConfig:
     provider: str | None
     publishable_key: str | None
     currency: str
+    payment_link: str | None = None
+    upi_id: str | None = None
+
+    @property
+    def manual(self) -> bool:
+        return bool(self.payment_link or self.upi_id)
 
 
 @dataclass(frozen=True)
@@ -34,6 +40,8 @@ def public_config() -> PaymentPublicConfig:
         provider=provider if enabled else None,
         publishable_key=publishable if enabled else None,
         currency=(settings.payment_currency or "INR").upper(),
+        payment_link=settings.payment_link_url.strip() or None,
+        upi_id=settings.payment_upi_id.strip() or None,
     )
 
 

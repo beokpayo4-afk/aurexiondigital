@@ -277,7 +277,8 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
     lines = [item for item in cart.items if item.deleted_at is None and (item.product_id is not None or item.package_id is not None)]
     if not lines:
         raise ApiError(422, "The cart is empty")
-    if not payments.public_config().enabled:
+    config = payments.public_config()
+    if not config.enabled and not config.manual:
         raise ApiError(503, "Payment could not be started because no payment gateway is connected.")
     billing = details.shipping if details.billing_same_as_shipping or details.billing is None else details.billing
     subtotal = _money(sum((item.unit_price_snapshot * item.quantity for item in lines), Decimal("0")))
@@ -331,7 +332,6 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
         )
         summary_lines.append(f"{name} x {item.quantity} — INR {line_total}")
         item.deleted_at = _now()
-    config = payments.public_config()
     payment = Payment(
         order_id=order.id,
         amount=subtotal,
@@ -385,9 +385,9 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
             ),
             "",
             "Aurexion Digital Private Limited",
-            "Flat No. S2, Plot 129, E6-A, Rera Colony, Nr Sai Board, Bagroda, Bhopal 462026, Madhya Pradesh",
+            "Flat No. S2-Plot 129 E6-A, RERA Colony, Near Sai Board, Bagroda, Bhopal – 462026, Madhya Pradesh, India",
             "aurexiondigital@gmail.com",
-            "9153940559",
+            "+91 9153940559",
         ]
     )
     email_sent = send_order_confirmation(
@@ -410,6 +410,8 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
             currency=config.currency,
             status=payment.status,
             reference=reference,
+            payment_link=config.payment_link,
+            upi_id=config.upi_id,
         ),
     )
 

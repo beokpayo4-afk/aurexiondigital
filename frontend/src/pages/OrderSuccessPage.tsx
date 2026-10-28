@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
+import { ManualPayment } from "@/components/shop/ManualPayment";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { downloadOrderItem, getOrder, listOrderDownloads } from "@/services/shopService";
+import { downloadOrderItem, getOrder, getPaymentConfig, listOrderDownloads } from "@/services/shopService";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/apiError";
 
@@ -17,6 +18,9 @@ export function OrderSuccessPage() {
   usePageTitle("Order");
   const order = useAsyncData(() => getOrder(orderId), [orderId]);
   const downloads = useAsyncData(() => (orderId ? listOrderDownloads(orderId) : Promise.resolve([])), [orderId]);
+  const paymentConfig = useAsyncData(() => getPaymentConfig(), []);
+  const manualPayment =
+    paymentConfig.data && !paymentConfig.data.enabled && (paymentConfig.data.payment_link || paymentConfig.data.upi_id) ? paymentConfig.data : null;
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   if (!orderId) {
@@ -61,7 +65,18 @@ export function OrderSuccessPage() {
               ))}
             </ul>
           ) : null}
-          {order.data.status === "pending" ? (
+          {order.data.status === "pending" && manualPayment ? (
+            <div className="mt-6">
+              <ManualPayment
+                orderNumber={order.data.order_number}
+                amount={order.data.total}
+                currency={order.data.currency}
+                paymentLink={manualPayment.payment_link}
+                upiId={manualPayment.upi_id}
+              />
+            </div>
+          ) : null}
+          {order.data.status === "pending" && !manualPayment ? (
             <p className="mt-4 text-sm leading-6 text-ink/75">
               Payment is still pending. A digital download stays locked until the payment gateway confirms success.
             </p>

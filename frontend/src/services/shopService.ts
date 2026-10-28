@@ -33,6 +33,8 @@ export type PaymentSession = {
   currency: string;
   status: string;
   reference: string | null;
+  payment_link?: string | null;
+  upi_id?: string | null;
 };
 
 export type CheckoutResult = {
@@ -146,6 +148,11 @@ export type OrderDetail = {
 
 export async function getOrder(orderId: string): Promise<OrderDetail> {
   const response = await api.get<OrderDetail>(`/orders/${orderId}`);
+  return response.data;
+}
+
+export async function getPaymentConfig(): Promise<PaymentSession> {
+  const response = await api.get<PaymentSession>("/payments/config");
   return response.data;
 }
 

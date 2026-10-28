@@ -30,6 +30,8 @@ services:
       PAYMENT_KEY_SECRET: ${PAYMENT_KEY_SECRET:-}
       PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-}
       PAYMENT_CURRENCY: ${PAYMENT_CURRENCY:-INR}
+      PAYMENT_LINK_URL: ${PAYMENT_LINK_URL:-https://razorpay.me/@aurexiondigitalprivatelimited}
+      PAYMENT_UPI_ID: ${PAYMENT_UPI_ID:-aurexiondigital212553.rzp@rxairtel}
       DOWNLOAD_STORAGE_DIR: ${DOWNLOAD_STORAGE_DIR:-}
     depends_on:
       db:
