@@ -14,7 +14,16 @@ from app.models.enums import ListingChannel, OrderItemType, OrderStatus, Payment
 from app.models.orders import Cart, CartItem, Order, OrderItem, Payment, PaymentTransaction
 from app.models.products import Product, ProductPrice
 from app.models.services import Service, ServicePackage
-from app.schemas.commerce import CartItemRead, CartRead, CheckoutCreate, CheckoutRead, DownloadAvailability, PaymentSessionRead
+from app.schemas.commerce import (
+    CartItemRead,
+    CartRead,
+    CheckoutCreate,
+    CheckoutRead,
+    DownloadAvailability,
+    PaymentSessionRead,
+    PaymentVerifyCreate,
+    PaymentVerifyRead,
+)
 from app.services import payments
 from app.services.api_error import ApiError
 from app.services.mailer import send_order_confirmation
@@ -340,17 +349,6 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
         provider=config.provider,
     )
     session.add(payment)
-    session.flush()
-    reference = payments.begin_reference(payment.id)
-    if reference:
-        session.add(
-            PaymentTransaction(
-                payment_id=payment.id,
-                amount=subtotal,
-                status=PaymentStatus.PENDING,
-                provider_reference=reference,
-            )
-        )
     session.commit()
     session.refresh(order)
     email_body = "\n".join(
@@ -409,28 +407,24 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
             publishable_key=config.publishable_key,
             currency=config.currency,
             status=payment.status,
-            reference=reference,
+            reference=None,
             payment_link=config.payment_link,
             upi_id=config.upi_id,
         ),
     )
 
 
-def apply_webhook(session: Session, body: bytes, signature: str | None) -> None:
-    event = payments.verify_webhook(body, signature)
-    payment = session.get(Payment, event.payment_id)
-    if payment is None:
-        raise ApiError(404, "Payment was not found")
+def _record_payment_result(session: Session, payment: Payment, *, succeeded: bool, provider_reference: str | None) -> None:
     if payment.status == PaymentStatus.SUCCEEDED:
         return
-    payment.status = PaymentStatus.SUCCEEDED if event.status == "succeeded" else PaymentStatus.FAILED
-    if event.provider_reference:
+    payment.status = PaymentStatus.SUCCEEDED if succeeded else PaymentStatus.FAILED
+    if provider_reference:
         session.add(
             PaymentTransaction(
                 payment_id=payment.id,
                 amount=payment.amount,
                 status=payment.status,
-                provider_reference=event.provider_reference,
+                provider_reference=provider_reference,
             )
         )
     if payment.status == PaymentStatus.SUCCEEDED:
@@ -440,6 +434,110 @@ def apply_webhook(session: Session, body: bytes, signature: str | None) -> None:
             from app.services.academy import fulfill_paid_order
 
             fulfill_paid_order(session, order)
+
+
+def apply_webhook(session: Session, body: bytes, signature: str | None) -> None:
+    event = payments.verify_webhook(body, signature)
+    payment = session.get(Payment, event.payment_id)
+    if payment is None:
+        raise ApiError(404, "Payment was not found")
+    _record_payment_result(session, payment, succeeded=event.status == "succeeded", provider_reference=event.provider_reference)
+    session.commit()
+
+
+def _owned_order(session: Session, *, user_id: UUID, order_id: UUID) -> Order:
+    order = session.scalars(
+        select(Order).options(selectinload(Order.payments)).where(Order.id == order_id, Order.user_id == user_id)
+    ).first()
+    if order is None:
+        raise ApiError(404, "Order was not found")
+    return order
+
+
+def _gateway_reference(session: Session, payment: Payment) -> str | None:
+    return session.scalars(
+        select(PaymentTransaction.provider_reference)
+        .where(
+            PaymentTransaction.payment_id == payment.id,
+            PaymentTransaction.status == PaymentStatus.PENDING,
+            PaymentTransaction.provider_reference.like("order_%"),
+        )
+        .order_by(PaymentTransaction.created_at.desc())
+    ).first()
+
+
+def start_payment(session: Session, *, user_id: UUID, order_id: UUID) -> PaymentSessionRead:
+    config = payments.public_config()
+    order = _owned_order(session, user_id=user_id, order_id=order_id)
+    payment = next((row for row in order.payments if row.status != PaymentStatus.SUCCEEDED), None)
+    if order.status != OrderStatus.PENDING or payment is None:
+        raise ApiError(409, "This order is already paid")
+    reference: str | None = None
+    if config.enabled:
+        reference = _gateway_reference(session, payment)
+        if reference is None:
+            reference = payments.create_razorpay_order(
+                payment_id=payment.id,
+                amount=payment.amount,
+                currency=payment.currency,
+                receipt=order.order_number,
+            )
+            payment.provider = config.provider
+            session.add(
+                PaymentTransaction(
+                    payment_id=payment.id,
+                    amount=payment.amount,
+                    status=PaymentStatus.PENDING,
+                    provider_reference=reference,
+                )
+            )
+            session.commit()
+    return PaymentSessionRead(
+        enabled=config.enabled,
+        provider=config.provider,
+        publishable_key=config.publishable_key,
+        currency=payment.currency,
+        status=payment.status,
+        reference=reference,
+        payment_link=config.payment_link,
+        upi_id=config.upi_id,
+    )
+
+
+def _payment_for_reference(session: Session, order_reference: str) -> Payment | None:
+    transaction = session.scalars(
+        select(PaymentTransaction).where(PaymentTransaction.provider_reference == order_reference)
+    ).first()
+    if transaction is None:
+        return None
+    return session.get(Payment, transaction.payment_id)
+
+
+def verify_payment(session: Session, *, user_id: UUID, data: PaymentVerifyCreate) -> PaymentVerifyRead:
+    order = _owned_order(session, user_id=user_id, order_id=data.order_id)
+    payment = _payment_for_reference(session, data.razorpay_order_id)
+    if payment is None or payment.order_id != order.id:
+        raise ApiError(404, "Payment was not found")
+    if not payments.verify_checkout_signature(
+        order_reference=data.razorpay_order_id,
+        payment_reference=data.razorpay_payment_id,
+        signature=data.razorpay_signature,
+    ):
+        raise ApiError(400, "The payment could not be verified")
+    _record_payment_result(session, payment, succeeded=True, provider_reference=data.razorpay_payment_id)
+    session.commit()
+    session.refresh(order)
+    return PaymentVerifyRead(order_id=order.id, order_number=order.order_number, status=order.status)
+
+
+def apply_razorpay_webhook(session: Session, body: bytes, signature: str | None) -> None:
+    event = payments.verify_razorpay_webhook(body, signature)
+    if event is None:
+        return
+    payment = _payment_for_reference(session, event.order_reference)
+    if payment is None:
+        return
+    _record_payment_result(session, payment, succeeded=True, provider_reference=event.payment_reference)
     session.commit()
 
 

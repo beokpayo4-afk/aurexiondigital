@@ -490,3 +490,121 @@ def test_admin_manage_enquiry() -> None:
         assert filtered.json()["total"] == 1
     finally:
         _cleanup(emails=emails, service_ids=[], product_ids=[], course_ids=[], user_ids=user_ids)
+
+
+def test_razorpay_checkout_marks_order_paid(monkeypatch) -> None:
+    import hashlib
+    import hmac
+    import json
+
+    from app.core.config import settings
+    from app.services import payments
+
+    key_secret = "test-razorpay-secret"
+    webhook_secret = "test-razorpay-webhook-secret"
+    monkeypatch.setattr(settings, "payment_provider", "razorpay")
+    monkeypatch.setattr(settings, "payment_key_id", "rzp_test_journey")
+    monkeypatch.setattr(settings, "payment_key_secret", key_secret)
+    monkeypatch.setattr(settings, "payment_webhook_secret", webhook_secret)
+    created_orders: list[dict[str, object]] = []
+
+    def fake_order(*, payment_id, amount, currency, receipt):
+        reference = f"order_{uuid.uuid4().hex[:14]}"
+        created_orders.append({"payment_id": payment_id, "amount": amount, "receipt": receipt, "reference": reference})
+        return reference
+
+    monkeypatch.setattr(payments, "create_razorpay_order", fake_order)
+
+    marker = uuid.uuid4().hex[:12]
+    emails: list[str] = []
+    product_ids: list[str] = []
+    user_ids: list[str] = []
+    try:
+        staff_email, staff_token, staff_id = _staff()
+        customer_email, customer_token, customer_id = _register("razorpay-shopper")
+        emails.extend([staff_email, customer_email])
+        user_ids.extend([staff_id, customer_id])
+        product = client.post(
+            "/api/products",
+            headers=_auth(staff_token),
+            json={
+                "name": f"Razorpay kit {marker}",
+                "slug": f"razorpay-kit-{marker}",
+                "business_area": "technology-digital-products",
+                "product_type": "software",
+                "listing_channel": "shop",
+                "is_published": True,
+            },
+        )
+        assert product.status_code == 201
+        product_id = product.json()["id"]
+        product_ids.append(product_id)
+        _price(product_id)
+        assert client.post("/api/cart/items", headers=_auth(customer_token), json={"product_id": product_id, "quantity": 1}).status_code == 200
+
+        checkout = client.post(
+            "/api/checkout",
+            headers=_auth(customer_token),
+            json={
+                "name": "Aurexion Customer",
+                "email": customer_email,
+                "phone": "9153940559",
+                "shipping": {"line1": "Bagroda", "city": "Bhopal", "state": "Madhya Pradesh", "postal_code": "462026", "country": "India"},
+                "billing_same_as_shipping": True,
+            },
+        )
+        assert checkout.status_code == 200
+        order = checkout.json()
+        assert order["payment"]["enabled"] is True
+        assert key_secret not in checkout.text
+
+        started = client.post(f"/api/orders/{order['order_id']}/pay", headers=_auth(customer_token))
+        assert started.status_code == 200
+        reference = started.json()["reference"]
+        assert reference == created_orders[0]["reference"]
+        assert started.json()["publishable_key"] == "rzp_test_journey"
+        assert key_secret not in started.text
+        assert created_orders[0]["amount"] == Decimal("499.00")
+        again = client.post(f"/api/orders/{order['order_id']}/pay", headers=_auth(customer_token))
+        assert again.json()["reference"] == reference
+        assert len(created_orders) == 1
+
+        forged = client.post(
+            "/api/payments/verify",
+            headers=_auth(customer_token),
+            json={
+                "order_id": order["order_id"],
+                "razorpay_order_id": reference,
+                "razorpay_payment_id": "pay_forged",
+                "razorpay_signature": "0" * 64,
+            },
+        )
+        assert forged.status_code == 400
+
+        payment_reference = "pay_journey123"
+        signature = hmac.new(key_secret.encode(), f"{reference}|{payment_reference}".encode(), hashlib.sha256).hexdigest()
+        verified = client.post(
+            "/api/payments/verify",
+            headers=_auth(customer_token),
+            json={
+                "order_id": order["order_id"],
+                "razorpay_order_id": reference,
+                "razorpay_payment_id": payment_reference,
+                "razorpay_signature": signature,
+            },
+        )
+        assert verified.status_code == 200
+        assert verified.json()["status"] == "paid"
+        assert client.get(f"/api/orders/{order['order_id']}", headers=_auth(customer_token)).json()["status"] == "paid"
+        assert client.post(f"/api/orders/{order['order_id']}/pay", headers=_auth(customer_token)).status_code == 409
+
+        body = json.dumps(
+            {"event": "payment.captured", "payload": {"payment": {"entity": {"id": payment_reference, "order_id": reference}}}}
+        ).encode()
+        bad_hook = client.post("/api/payments/razorpay/webhook", content=body, headers={"X-Razorpay-Signature": "bad"})
+        assert bad_hook.status_code == 401
+        hook_signature = hmac.new(webhook_secret.encode(), body, hashlib.sha256).hexdigest()
+        hook = client.post("/api/payments/razorpay/webhook", content=body, headers={"X-Razorpay-Signature": hook_signature})
+        assert hook.status_code == 204
+    finally:
+        _cleanup(emails=emails, service_ids=[], product_ids=product_ids, course_ids=[], user_ids=user_ids)

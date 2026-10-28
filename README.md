@@ -81,16 +81,24 @@ Root `.env` is read by Docker Compose.
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh cookie lifetime |
 | `VITE_API_BASE_URL` | API base baked into the frontend build |
-| `PAYMENT_PROVIDER` | Payment provider name |
-| `PAYMENT_KEY_ID` | Publishable payment key |
-| `PAYMENT_KEY_SECRET` | Payment secret. Never return it from the API |
-| `PAYMENT_WEBHOOK_SECRET` | Webhook signing secret |
+| `PAYMENT_PROVIDER` | `razorpay` turns on Razorpay Checkout |
+| `PAYMENT_KEY_ID` | Razorpay Key ID, sent to the browser |
+| `PAYMENT_KEY_SECRET` | Razorpay Key Secret. Never return it from the API |
+| `PAYMENT_WEBHOOK_SECRET` | Razorpay webhook secret |
 | `PAYMENT_CURRENCY` | Currency code. Default `INR` |
-| `PAYMENT_LINK_URL` | Razorpay payment page shown after Pay now |
-| `PAYMENT_UPI_ID` | UPI ID shown after Pay now |
+| `PAYMENT_LINK_URL` | Razorpay payment page shown when Checkout is off |
+| `PAYMENT_UPI_ID` | UPI ID shown when Checkout is off |
 | `DOWNLOAD_STORAGE_DIR` | Private directory for paid downloads |
 
 `frontend/.env.example` only sets `VITE_API_BASE_URL`. `backend/.env.example` lists the API settings.
+
+## Razorpay
+
+With `PAYMENT_PROVIDER=razorpay`, `PAYMENT_KEY_ID`, and `PAYMENT_KEY_SECRET` set, Pay now opens Razorpay Checkout. The API creates the Razorpay order, checks the payment signature, and marks the order paid. The customer then sees Payment successful.
+
+In the Razorpay Dashboard, add a webhook at `https://<api-host>/api/payments/razorpay/webhook` for the `payment.captured` and `order.paid` events, and put its secret in `PAYMENT_WEBHOOK_SECRET`. The webhook marks the order paid when the customer closes the browser before the page confirms it.
+
+Without those keys, Pay now shows the payment link, UPI ID, and QR code. Those payments are not confirmed by the website.
 
 Admin creation reads `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optional `ADMIN_FULL_NAME`. Those are not stored in the example files.
 

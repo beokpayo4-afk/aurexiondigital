@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ManualPayment } from "@/components/shop/ManualPayment";
 
 describe("manual payment", () => {
-  it("shows the Razorpay link, UPI ID, and QR for a placed order", () => {
+  it("shows the Razorpay link and UPI ID for a placed order", () => {
     render(
       <ManualPayment
         orderNumber="AX-55FF558C"
@@ -21,6 +21,6 @@ describe("manual payment", () => {
     expect(upi.startsWith("upi://pay?")).toBe(true);
     expect(upi).toContain("am=2499.00");
     expect(upi).toContain("tn=AX-55FF558C");
-    expect(screen.getByRole("img", { name: /UPI QR code/ })).toHaveAttribute("src", "/razorpay-upi-qr.jpg");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 });

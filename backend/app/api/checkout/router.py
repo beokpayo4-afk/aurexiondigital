@@ -8,7 +8,14 @@ from app.api.deps import get_current_user, get_db
 from app.api.files import download_response
 from app.api.http import call_api
 from app.models.auth import User
-from app.schemas.commerce import CheckoutCreate, CheckoutRead, DownloadAvailability, PaymentSessionRead
+from app.schemas.commerce import (
+    CheckoutCreate,
+    CheckoutRead,
+    DownloadAvailability,
+    PaymentSessionRead,
+    PaymentVerifyCreate,
+    PaymentVerifyRead,
+)
 from app.services import commerce, payments
 
 router = APIRouter(tags=["payments"])
@@ -36,6 +43,34 @@ def checkout(
     user: Annotated[User, Depends(get_current_user)],
 ) -> CheckoutRead:
     return call_api(lambda: commerce.checkout(session, user_id=user.id, details=details))
+
+
+@router.post("/orders/{order_id}/pay", response_model=PaymentSessionRead, summary="Start the gateway payment for a pending order")
+def start_payment(
+    order_id: UUID,
+    session: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> PaymentSessionRead:
+    return call_api(lambda: commerce.start_payment(session, user_id=user.id, order_id=order_id))
+
+
+@router.post("/payments/verify", response_model=PaymentVerifyRead, summary="Verify a Razorpay Checkout payment")
+def verify_payment(
+    data: PaymentVerifyCreate,
+    session: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> PaymentVerifyRead:
+    return call_api(lambda: commerce.verify_payment(session, user_id=user.id, data=data))
+
+
+@router.post("/payments/razorpay/webhook", status_code=204, summary="Record a verified Razorpay payment")
+async def razorpay_webhook(
+    request: Request,
+    session: Annotated[Session, Depends(get_db)],
+    signature: Annotated[str | None, Header(alias="X-Razorpay-Signature")] = None,
+) -> None:
+    body = await request.body()
+    call_api(lambda: commerce.apply_razorpay_webhook(session, body, signature))
 
 
 @router.post("/payments/webhook", status_code=204, summary="Record a verified payment result")

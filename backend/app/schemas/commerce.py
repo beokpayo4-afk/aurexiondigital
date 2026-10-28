@@ -76,6 +76,19 @@ class PaymentSessionRead(BaseModel):
     upi_id: str | None = None
 
 
+class PaymentVerifyCreate(BaseModel):
+    order_id: UUID
+    razorpay_order_id: str = Field(min_length=1, max_length=120)
+    razorpay_payment_id: str = Field(min_length=1, max_length=120)
+    razorpay_signature: str = Field(min_length=1, max_length=256)
+
+
+class PaymentVerifyRead(BaseModel):
+    order_id: UUID
+    order_number: str
+    status: OrderStatus
+
+
 class CheckoutRead(BaseModel):
     order_id: UUID
     order_number: str

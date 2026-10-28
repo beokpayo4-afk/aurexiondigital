@@ -14,7 +14,7 @@ from app.core.roles import RoleCode
 from app.models.auth import UserRole
 from app.models.courses import Certificate, Course, CourseEnrollment, CourseLesson, CourseModule, CourseProgress, CourseResource
 from app.models.enums import CertificateStatus, EnrollmentSource, EnrollmentStatus, OrderItemType, OrderStatus, PaymentStatus
-from app.models.orders import Order, OrderItem, Payment, PaymentTransaction
+from app.models.orders import Order, OrderItem, Payment
 from app.repositories import auth as auth_repo
 from app.schemas.academy import (
     AcademyCheckoutRead,
@@ -134,6 +134,8 @@ def _payment_read(payment: Payment, reference: str | None) -> PaymentSessionRead
         currency=config.currency,
         status=payment.status,
         reference=reference,
+        payment_link=config.payment_link,
+        upi_id=config.upi_id,
     )
 
 
@@ -213,20 +215,9 @@ def buy_course(session: Session, *, user_id: UUID, course_id: UUID) -> AcademyCh
         provider=config.provider,
     )
     session.add(payment)
-    session.flush()
-    reference = payments.begin_reference(payment.id)
-    if reference:
-        session.add(
-            PaymentTransaction(
-                payment_id=payment.id,
-                amount=amount,
-                status=PaymentStatus.PENDING,
-                provider_reference=reference,
-            )
-        )
     session.commit()
     session.refresh(order)
-    return _checkout_read(order, payment, course_id=course.id, enrollment_status=enrollment.status, reference=reference)
+    return _checkout_read(order, payment, course_id=course.id, enrollment_status=enrollment.status, reference=None)
 
 
 def grant_student(session: Session, user_id: UUID) -> None:

@@ -34,7 +34,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
     setSubmitting(true);
     try {
       const result = await buyCourse(course.id);
-      navigate(`/order-success?order=${result.order_id}`);
+      navigate(`/order-success?order=${result.order_id}&pay=1`);
     } catch (reason) {
       setError(apiErrorMessage(reason, "The course order could not be created."));
       setSubmitting(false);

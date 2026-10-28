@@ -33,21 +33,19 @@ export function PaymentPage() {
     setSubmitting(true);
     try {
       const result = await checkout(draft);
-      if (result.payment.enabled) {
-        sessionStorage.removeItem("aurexion.checkout");
-        await refresh();
-        navigate(`/order-success?order=${result.order_id}&emailed=${result.email_sent ? "1" : "0"}`);
-        return;
-      }
-      if (!result.payment.payment_link && !result.payment.upi_id) {
+      await refresh();
+      if (!result.payment.enabled && !result.payment.payment_link && !result.payment.upi_id) {
         setError("Payment could not be started because no payment gateway is connected.");
         setSubmitting(false);
         return;
       }
       sessionStorage.removeItem("aurexion.checkout");
+      if (result.payment.enabled) {
+        navigate(`/order-success?order=${result.order_id}&pay=1&emailed=${result.email_sent ? "1" : "0"}`);
+        return;
+      }
       setPlaced(result);
       setSubmitting(false);
-      await refresh();
     } catch (reason) {
       const message = apiErrorMessage(reason, "The payment could not be started.");
       setError(message);

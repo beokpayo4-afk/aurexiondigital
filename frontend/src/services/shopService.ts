@@ -156,6 +156,23 @@ export async function getPaymentConfig(): Promise<PaymentSession> {
   return response.data;
 }
 
+export async function startPayment(orderId: string): Promise<PaymentSession> {
+  const response = await api.post<PaymentSession>(`/orders/${orderId}/pay`);
+  return response.data;
+}
+
+export type PaymentVerification = {
+  order_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+export async function verifyPayment(body: PaymentVerification): Promise<{ order_id: string; order_number: string; status: string }> {
+  const response = await api.post<{ order_id: string; order_number: string; status: string }>("/payments/verify", body);
+  return response.data;
+}
+
 export async function checkout(details: CheckoutDetails): Promise<CheckoutResult> {
   const response = await api.post<CheckoutResult>("/checkout", details);
   return response.data;
