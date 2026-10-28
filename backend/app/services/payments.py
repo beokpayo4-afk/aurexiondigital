@@ -40,7 +40,7 @@ class PaymentEvent:
 @dataclass(frozen=True)
 class RazorpayEvent:
     order_reference: str
-    payment_reference: str | None
+    payment_reference: str
 
 
 def public_config() -> PaymentPublicConfig:
@@ -110,13 +110,12 @@ def verify_razorpay_webhook(body: bytes, signature: str | None) -> RazorpayEvent
         return None
     entity = (payload.get("payload") or {}).get("payment", {}).get("entity") or {}
     order_reference = entity.get("order_id")
+    payment_reference = entity.get("id")
     if not isinstance(order_reference, str) or not order_reference:
         return None
-    payment_reference = entity.get("id")
-    return RazorpayEvent(
-        order_reference=order_reference,
-        payment_reference=payment_reference if isinstance(payment_reference, str) else None,
-    )
+    if not isinstance(payment_reference, str) or not payment_reference:
+        return None
+    return RazorpayEvent(order_reference=order_reference, payment_reference=payment_reference)
 
 
 def verify_webhook(body: bytes, signature: str | None) -> PaymentEvent:

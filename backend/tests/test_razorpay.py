@@ -44,6 +44,24 @@ def test_razorpay_error_is_reported(monkeypatch, razorpay_keys) -> None:
     assert caught.value.status_code == 502
 
 
+def test_webhook_needs_a_razorpay_payment_id(monkeypatch) -> None:
+    import hashlib
+    import hmac
+    import json
+
+    monkeypatch.setattr(settings, "payment_webhook_secret", "unit-webhook-secret")
+
+    def signed(entity: dict[str, str]) -> tuple[bytes, str]:
+        body = json.dumps({"event": "payment.captured", "payload": {"payment": {"entity": entity}}}).encode()
+        return body, hmac.new(b"unit-webhook-secret", body, hashlib.sha256).hexdigest()
+
+    body, signature = signed({"order_id": "order_unit123"})
+    assert payments.verify_razorpay_webhook(body, signature) is None
+    body, signature = signed({"order_id": "order_unit123", "id": "pay_unit123"})
+    event = payments.verify_razorpay_webhook(body, signature)
+    assert event == payments.RazorpayEvent(order_reference="order_unit123", payment_reference="pay_unit123")
+
+
 def test_gateway_needs_razorpay_keys(monkeypatch) -> None:
     monkeypatch.setattr(settings, "payment_provider", "razorpay")
     monkeypatch.setattr(settings, "payment_key_id", "")
