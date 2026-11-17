@@ -10,9 +10,9 @@ export const SITE = {
   emailHref: "mailto:aurexiondigital@gmail.com",
   addressLines: [
     "Flat No. S2-Plot 129 E6-A,",
-    "ARERA Colony, Near Sai Board,",
+    "Arera Colony, Near Sai Board,",
     "Bagroda, Bhopal – 462026,",
     "Madhya Pradesh, India",
   ],
-  address: "Flat No. S2-Plot 129 E6-A, ARERA Colony, Near Sai Board, Bagroda, Bhopal – 462026, Madhya Pradesh, India",
+  address: "Flat No. S2-Plot 129 E6-A, Arera Colony, Near Sai Board, Bagroda, Bhopal – 462026, Madhya Pradesh, India",
 } as const;

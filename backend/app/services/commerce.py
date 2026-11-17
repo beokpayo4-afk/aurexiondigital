@@ -383,7 +383,7 @@ def checkout(session: Session, *, user_id: UUID, details: CheckoutCreate) -> Che
             ),
             "",
             "Aurexion Digital Private Limited",
-            "Flat No. S2-Plot 129 E6-A, ARERA Colony, Near Sai Board, Bagroda, Bhopal – 462026, Madhya Pradesh, India",
+            "Flat No. S2-Plot 129 E6-A, Arera Colony, Near Sai Board, Bagroda, Bhopal – 462026, Madhya Pradesh, India",
             "aurexiondigital@gmail.com",
             "+91 9153940559",
         ]
