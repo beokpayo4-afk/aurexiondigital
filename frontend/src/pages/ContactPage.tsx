@@ -43,8 +43,8 @@ export function ContactPage() {
       />
       <section className="bg-paper">
         <Container className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div>
-            <h2 className="text-2xl font-semibold">Reach us</h2>
+          <div className="rounded-xl border border-line bg-white p-6 shadow-card">
+            <h2 className="text-2xl font-semibold">Contact Us</h2>
             <div className="mt-6">
               <ContactDetails />
             </div>
